@@ -33,6 +33,15 @@ import (
 
 var domain, theme string
 
+func createConfigToml() {
+	var fileOutput string
+	sitePath := basePath + string(filepath.Separator) + "sites" + string(filepath.Separator) + domain
+	fileOutput += "domain = \"" + domain + "\"\n"
+	fileOutput += "theme = \"" + theme + "\"\n"
+
+	writeFile(sitePath+string(filepath.Separator)+"config.toml", fileOutput)
+}
+
 func createMarkdownTemplate(template string, filename string, isPage bool) {
 	themePath := basePath + string(filepath.Separator) + "sites" + string(filepath.Separator) + domain + string(filepath.Separator) + "theme" + string(filepath.Separator) + theme
 	sitePath := basePath + string(filepath.Separator) + "sites" + string(filepath.Separator) + domain
@@ -119,6 +128,9 @@ func scaffoldSite() {
 			log.Fatal("Selected theme could not be copied to site")
 		}
 	}
+
+	// Create config.toml file - domain, theme
+	createConfigToml()
 
 	// Add default markdown file and any partials - enough to render homepage
 	createMarkdownTemplate("default.html", "pages/index.md", true)
