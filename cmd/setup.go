@@ -28,8 +28,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var basePath string = "." + string(filepath.Separator)
-
 func createFolders() {
 	err := os.Mkdir(basePath+"themes", 0755)
 	err = os.Mkdir(basePath+"sites", 0755)

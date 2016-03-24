@@ -39,6 +39,7 @@ func createConfigToml() {
 	fileOutput += "domain = \"" + domain + "\"\n"
 	fileOutput += "theme = \"" + theme + "\"\n"
 
+	// Write file
 	writeFile(sitePath+string(filepath.Separator)+"config.toml", fileOutput)
 }
 
@@ -193,6 +194,7 @@ var startCmd = &cobra.Command{
     `,
 	Run: func(cmd *cobra.Command, args []string) {
 		domain = strings.Join(args, " ")
+		setBasePath()
 		scaffoldSite()
 	},
 }

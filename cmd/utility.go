@@ -26,7 +26,18 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 )
+
+var basePath string
+
+func setBasePath() {
+	if dirExist("sites") {
+		basePath = "." + string(filepath.Separator)
+	} else {
+		basePath = ".." + string(filepath.Separator)
+	}
+}
 
 func writeFile(filename string, content string) {
 	err := ioutil.WriteFile(filename, []byte(content), 0755)
