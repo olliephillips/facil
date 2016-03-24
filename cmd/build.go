@@ -58,7 +58,8 @@ func processBlogFile() {
 
 }
 
-func processPartialFile(filename string, markdown string, template string) {
+func processPartial(filename string, markdown string, template string) {
+	// THis is our regex \*\*\*\s([a-zA-Z]*)\s.*\n([\d\D][^\*]*)\*\*\*  (needs g modifier) to pick out the name and markdown from the mark down files
 	// Merge the files!!
 	fmt.Println("Filename:", filename)
 	fmt.Println("Markdown:", markdown)
@@ -94,12 +95,9 @@ func buildPartials() {
 				partialsMarkdown[filename] = string(md)
 				partialsTemplate[filename] = string(tmp)
 
-				//fmt.Println(partialsMarkdown)
-				//fmt.Println(partialsTemplate)
-
 				// Range over one of the maps, pass name and both the markdown and template as args to processPartialFile()
 				for k := range partialsMarkdown {
-					processPartialFile(k, partialsMarkdown[k], partialsTemplate[k])
+					processPartial(k, partialsMarkdown[k], partialsTemplate[k])
 				}
 			}
 		}
