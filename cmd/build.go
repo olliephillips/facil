@@ -21,6 +21,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -35,6 +36,8 @@ var project string
 var relPath string
 var projectDir string
 var conf config
+
+var partialsOutput map[string]string
 
 type config struct {
 	Domain string
@@ -55,7 +58,60 @@ func processBlogFile() {
 
 }
 
-func processPartialFile() {
+func processPartialFile(filename string, markdown string, template string) {
+	// Merge the files!!
+	fmt.Println("Filename:", filename)
+	fmt.Println("Markdown:", markdown)
+	fmt.Println("Template:", template)
+	// partialsOutput[filename] = the merge result
+}
+
+func buildPartials() {
+	// Get partials
+	partialsMarkdown := make(map[string]string)
+	partialsTemplate := make(map[string]string)
+	partialsOutput = make(map[string]string) // Package namespace
+
+	err := filepath.Walk(relPath+projectDir+string(filepath.Separator)+"partials", func(path string, f os.FileInfo, _ error) error {
+		if !f.IsDir() {
+			filename := strings.ToLower(strings.Split(f.Name(), ".")[0])
+			extension := strings.ToLower(strings.Split(f.Name(), ".")[1])
+			if extension == "md" {
+				// Get the markdown file
+				md, err := ioutil.ReadFile(relPath + projectDir + string(filepath.Separator) + "partials" + string(filepath.Separator) + f.Name())
+				if err != nil {
+					log.Fatal("Error reading a partial markdown file")
+				}
+
+				tmp, err := ioutil.ReadFile(relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + theme +
+					string(filepath.Separator) + "partials" + string(filepath.Separator) + filename + ".html")
+
+				if err != nil {
+					log.Fatal("Error reading a partial template file")
+				}
+
+				// Store to our maps
+				partialsMarkdown[filename] = string(md)
+				partialsTemplate[filename] = string(tmp)
+
+				//fmt.Println(partialsMarkdown)
+				//fmt.Println(partialsTemplate)
+
+				// Range over one of the maps, pass name and both the markdown and template as args to processPartialFile()
+				for k := range partialsMarkdown {
+					processPartialFile(k, partialsMarkdown[k], partialsTemplate[k])
+				}
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatal("Error unable to build partials")
+	}
+
+}
+
+func buildPages() {
 
 }
 
@@ -162,11 +218,11 @@ func buildProject() {
 	// Copy theme assets to compiled folder, remove html templates
 	copyThemeAssets()
 
-	// Traverse projects partials folder
-	// Parse each partial file
+	// Build partials
+	buildPartials()
 
-	// Traverse projects pages folder
-	// Parse each page file
+	// Build Pages
+	buildPages()
 
 	// Traverse projects blog folder
 	// Each blog file
