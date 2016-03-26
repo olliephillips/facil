@@ -26,9 +26,11 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/russross/blackfriday"
 	"github.com/spf13/cobra"
 )
 
@@ -58,13 +60,40 @@ func processBlogFile() {
 
 }
 
-func processPartial(filename string, markdown string, template string) {
-	// THis is our regex \*\*\*\s([a-zA-Z]*)\s.*\n([\d\D][^\*]*)\*\*\*  (needs g modifier) to pick out the name and markdown from the mark down files
+func processPartial(filename string, markdown string, template string) string {
+	// THis is our regex \*\*\*\s([a-zA-Z0-9]*)\s.*\n([\d\D][^\*]*)\*\*\*  (needs g modifier) to pick out the name and markdown from the mark down files
 	// Merge the files!!
-	fmt.Println("Filename:", filename)
-	fmt.Println("Markdown:", markdown)
-	fmt.Println("Template:", template)
-	// partialsOutput[filename] = the merge result
+
+	var partialOutput string
+
+	// Parse element tags in template with regex
+	var templateToken = regexp.MustCompile(`\[\[element\sname\=\"([a-zA-Z0-9]*)\"\sdescription\=\"(.*)"]]`)
+	templateTokens := templateToken.FindAllStringSubmatch(string(template), -1)
+
+	// Parse element tags in markdown file with regex
+	var markdownToken = regexp.MustCompile(`\*\*\*\s([a-zA-Z0-9]*)\s.*\n([\d\D][^\*]*)\*\*\*`)
+	markdownTokens := markdownToken.FindAllStringSubmatch(string(markdown), -1)
+
+	// Range over all the markdown tokens
+	for i := range markdownTokens {
+		token := strings.ToLower(markdownTokens[i][1])
+
+		// Process Markdown content ready for inclusion
+		htmlContent := string(blackfriday.MarkdownCommon([]byte(markdownTokens[i][2])))
+
+		if token == strings.ToLower(templateTokens[i][1]) {
+			// We have a match
+			description := templateTokens[i][2]
+			// What to replace
+			replace := "[[element name=\"" + token + "\" description=\"" + description + "\"]]"
+			// Replace
+			template = strings.Replace(template, replace, htmlContent, -1)
+		}
+	}
+	partialOutput = template
+
+	// Return a merged string
+	return partialOutput
 }
 
 func buildPartials() {
@@ -95,18 +124,22 @@ func buildPartials() {
 				partialsMarkdown[filename] = string(md)
 				partialsTemplate[filename] = string(tmp)
 
-				// Range over one of the maps, pass name and both the markdown and template as args to processPartialFile()
-				for k := range partialsMarkdown {
-					processPartial(k, partialsMarkdown[k], partialsTemplate[k])
-				}
 			}
 		}
+
 		return nil
 	})
+
 	if err != nil {
 		log.Fatal("Error unable to build partials")
 	}
 
+	// Range over one of the maps, pass name and both the markdown and template as args to processPartial()
+	for k := range partialsMarkdown {
+		partialsOutput[k] = processPartial(k, partialsMarkdown[k], partialsTemplate[k])
+	}
+	fmt.Println(partialsOutput)
+	// partialsOutput[key] = "combined markdown and template converted to html"
 }
 
 func buildPages() {
@@ -141,7 +174,6 @@ func copyThemeAssets() {
 			// Remove partials folder
 			_ = os.Remove(relPath + projectDir + string(filepath.Separator) + "compiled" + string(filepath.Separator) + f.Name())
 		}
-
 		return nil
 	})
 
@@ -220,10 +252,11 @@ func buildProject() {
 	buildPartials()
 
 	// Build Pages
-	buildPages()
+	//go buildPages()
 
 	// Traverse projects blog folder
 	// Each blog file
+	//go buildBlogs()
 
 }
 

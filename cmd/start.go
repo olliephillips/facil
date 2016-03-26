@@ -89,8 +89,9 @@ func createMarkdownTemplate(template string, filename string, isPage bool) {
 
 		// Compose element output
 		for i := range elementTokens {
-			fileOutput += "*** " + strings.Title(elementTokens[i][1]) + " (" + elementTokens[i][2] + ") ***\n"
-			fileOutput += "#Your markdown syntax here\n\n"
+			fileOutput += "*** " + strings.Title(elementTokens[i][1]) + " (" + elementTokens[i][2] + ")\n\n"
+			fileOutput += "# Your " + strings.Title(elementTokens[i][1]) + " markdown syntax here\n\n"
+			fileOutput += "***\n\n"
 		}
 
 		// Write to file
