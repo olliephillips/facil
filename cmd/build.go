@@ -41,12 +41,15 @@ var conf config
 
 var partialsOutput map[string]string
 
+var siteMap []string
+var nav []string
+
 type config struct {
 	Domain string
 	Theme  string
 }
 
-func processPageFile() {
+func processPageFile(page string) {
 	// Get the template from file
 
 	// Read template from theme
@@ -56,8 +59,112 @@ func processPageFile() {
 	// Write new file to complied folder
 }
 
-func processBlogFile() {
+func processBlog() {
 
+}
+
+func addToSitemapAndNav(dest string) {
+	element := strings.Split(dest, "compiled")[1]
+	element = strings.Replace(element, string(filepath.Separator)+"index.html", "", -1)
+
+	// Add to sitemap
+	sitemapElement := conf.Domain + element
+	siteMap = append(siteMap, sitemapElement)
+
+	// Add to nav
+	navElement := strings.Replace(element, ".html", "", -1)
+	nav = append(nav, navElement)
+}
+
+func processFile(source string, dest string, contentType string) (err error) {
+	dest = strings.Replace(dest, ".md", ".html", -1)
+
+	// Add to sitemap and nav
+	addToSitemapAndNav(dest)
+
+	switch contentType {
+	case "pages":
+		processPageFile(source)
+	case "blog":
+		//processBlog(sourceFile)
+	}
+
+	destfile, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+
+	defer destfile.Close()
+
+	// At this point we have an empty file we can write to
+
+	/*
+		_, err = io.Copy(destfile, sourcefile)
+		if err == nil {
+			sourceinfo, err := os.Stat(source)
+			if err != nil {
+				err = os.Chmod(dest, sourceinfo.Mode())
+			}
+		}*/
+	return
+}
+
+func processDir(source string, dest string, contentType string) (err error) {
+	// Dest properties of source dir
+	sourceinfo, err := os.Stat(source)
+	if err != nil {
+		return err
+	}
+
+	// Create dest dir
+	err = os.MkdirAll(dest, sourceinfo.Mode())
+	if err != nil {
+		return err
+	}
+
+	directory, _ := os.Open(source)
+	objects, err := directory.Readdir(-1)
+
+	for _, obj := range objects {
+		sourcefilepointer := source + "/" + obj.Name()
+		destinationfilepointer := dest + "/" + obj.Name()
+
+		if obj.IsDir() {
+			// Create sub-directories - recursively
+			err = processDir(sourcefilepointer, destinationfilepointer, contentType)
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			// Perform copy
+			err = processFile(sourcefilepointer, destinationfilepointer, contentType)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+	return
+}
+
+func buildPages() {
+
+	// Get markdown pages iterate subdirectories to understand nav hierarchy
+
+	processDir(relPath+projectDir+string(filepath.Separator)+"pages", relPath+projectDir+string(filepath.Separator)+"compiled", "page")
+
+	// Build a special nav/menu partial
+
+	// Read the toml config of each markdown file
+
+	// Read all the markdown tokens to map
+
+	// Get the template to use
+
+	// Process any partials
+
+	// Process token replacements
+
+	// Write a page in the format directory_path/page_title/index.html
 }
 
 func processPartial(filename string, markdown string, template string) string {
@@ -104,6 +211,7 @@ func buildPartials() {
 
 	err := filepath.Walk(relPath+projectDir+string(filepath.Separator)+"partials", func(path string, f os.FileInfo, _ error) error {
 		if !f.IsDir() {
+			//go func() {
 			filename := strings.ToLower(strings.Split(f.Name(), ".")[0])
 			extension := strings.ToLower(strings.Split(f.Name(), ".")[1])
 			if extension == "md" {
@@ -123,10 +231,9 @@ func buildPartials() {
 				// Store to our maps
 				partialsMarkdown[filename] = string(md)
 				partialsTemplate[filename] = string(tmp)
-
 			}
+			//}()
 		}
-
 		return nil
 	})
 
@@ -138,12 +245,6 @@ func buildPartials() {
 	for k := range partialsMarkdown {
 		partialsOutput[k] = processPartial(k, partialsMarkdown[k], partialsTemplate[k])
 	}
-	fmt.Println(partialsOutput)
-	// partialsOutput[key] = "combined markdown and template converted to html"
-}
-
-func buildPages() {
-
 }
 
 func copyThemeAssets() {
@@ -245,19 +346,26 @@ func buildProject() {
 		log.Fatal("Error cannot parse config.toml")
 	}
 
+	// Wipe entire "compiled" directory
+	deleteDirectoryContents(relPath + projectDir + string(filepath.Separator) + "compiled")
+
 	// Copy theme assets to compiled folder, remove html templates
 	copyThemeAssets()
 
 	// Build partials
 	buildPartials()
+	//fmt.Println(partialsOutput)
 
 	// Build Pages
-	//go buildPages()
+	buildPages()
 
 	// Traverse projects blog folder
 	// Each blog file
 	//go buildBlogs()
 
+	// Should have a map/slice of pages to include navigation on
+	// Do this for each page and write it to compiled directory
+	// WHat about nav order override?
 }
 
 // buildCmd represents the build command

@@ -114,3 +114,17 @@ func copyDir(source string, dest string) (err error) {
 	}
 	return
 }
+
+func deleteDirectoryContents(dir string) {
+	d, err := os.Open(dir)
+	defer d.Close()
+
+	names, err := d.Readdirnames(-1)
+
+	for _, name := range names {
+		err = os.RemoveAll(filepath.Join(dir, name))
+	}
+	if err != nil {
+		log.Fatal("Error site static files could not be deleted")
+	}
+}
