@@ -397,7 +397,7 @@ func copyThemeAssets() {
 	}
 }
 
-func writePages() {
+func writePages(nav string) {
 
 	/*
 		destfile, err := os.Create(dest)
@@ -430,7 +430,6 @@ func makeNav() string {
 		// Need to reorder based on order struct properties
 		text := navElements[i].Text
 		link := navElements[i].Link
-		//order := navElements[i].Order
 
 		linkElements := strings.Split(link, "/")
 		elementsCount := len(linkElements)
@@ -441,18 +440,11 @@ func makeNav() string {
 			curLevel = 2
 		}
 
-		fmt.Println("cur:", curLevel)
-		fmt.Println("prev:", prevLevel)
-
 		if curLevel == 2 && prevLevel == 3 {
 			html += "\t\t</ul>\n\t</li>\n"
 			html += "\t<li><a href=\"" + link + "\">" + text + "</a></li>\n"
 		}
-		/*
-			if curLevel == 2 {
 
-			}
-		*/
 		if curLevel == 3 && prevLevel == 2 {
 			html += "\t<li><a href=\"" + link + "\">" + text + "</a>\n"
 			html += "\t\t<ul>\n"
@@ -466,8 +458,13 @@ func makeNav() string {
 		}
 		prevLevel = curLevel
 	}
+
+	if curLevel == 3 && prevLevel == 3 {
+		html += "\t\t</ul>\n\t</li>\n"
+	}
+
 	html += "</ul>"
-	fmt.Println(html)
+
 	return html
 }
 
@@ -552,12 +549,10 @@ func buildProject() {
 	//processDir()
 
 	// Make Navigation
-	_ = makeNav()
+	nav := makeNav()
 
 	// Write pages, replacing navigation token
-	//writePages(nav)
-
-	// WHat about nav order override?
+	writePages(nav)
 
 	// Write a sitemap.xml
 }
