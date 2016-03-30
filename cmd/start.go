@@ -77,6 +77,11 @@ func createMarkdownTemplate(template string, filename string, isPage bool) {
 				fileOutput += metaTokens[i][1] + " = \"\"\n"
 			}
 
+			// Add navigation tokens
+			fileOutput += "\n[Navigation]\n"
+			fileOutput += "text = \"\"\n"
+			fileOutput += "order = \"0\"\n"
+
 			// Add design tokens
 			fileOutput += "\n[Design]\n"
 			fileOutput += "template = \"" + strings.Replace(template, ".html", "", -1) + "\"\n"

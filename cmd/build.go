@@ -26,6 +26,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -34,9 +35,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type page struct {
+type pageContent struct {
 	Path    string
 	Content string
+}
+
+type navigationContent struct {
+	Text  string
+	Order string
+	Link  string
 }
 
 type config struct {
@@ -45,15 +52,19 @@ type config struct {
 }
 
 type pageConfig struct {
-	Meta   meta
-	Design design
+	Meta       meta
+	Navigation navigation
+	Design     design
 }
 
 type meta struct {
-	Title         string
-	Description   string
-	Draft         bool
-	PublishedDate string
+	Title       string `toml:"title"`
+	Description string `toml:"description"`
+}
+
+type navigation struct {
+	Text  string
+	Order string
 }
 
 type design struct {
@@ -68,11 +79,14 @@ var pageConf pageConfig
 
 var partialsOutput map[string]string
 
-var pages []page
+var pages []pageContent
+var navigationItems []navigationContent
 var siteMap []string
 var nav []string
 
-func processPageFile(page string) {
+//var navHTML string
+
+func processPageFile(page string, dest string) {
 	var output string
 
 	// Get the template from file
@@ -90,7 +104,25 @@ func processPageFile(page string) {
 			//log.Fatal("Error cannot parse page's toml config")
 			log.Fatal(err)
 		}
-		fmt.Println(pageConf.Design.Template)
+
+		// Add to sitemap & nav
+		element := strings.Split(dest, "compiled")[1]
+		element = strings.Replace(element, string(filepath.Separator)+"index.html", "/", -1)
+
+		// Add to sitemap
+		sitemapElement := conf.Domain + element
+		siteMap = append(siteMap, sitemapElement)
+
+		// Add to nav
+		navElement := strings.Replace(element, ".html", "", -1)
+		fmt.Println(pageConf.Navigation.Text)
+
+		nav := navigationContent{
+			Text:  pageConf.Navigation.Text,
+			Order: pageConf.Navigation.Order,
+			Link:  navElement,
+		}
+		navigationItems = append(navigationItems, nav)
 
 		// Read template from theme
 		pageTemplate := relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + conf.Theme + string(filepath.Separator) + pageConf.Design.Template + ".html"
@@ -100,29 +132,35 @@ func processPageFile(page string) {
 			log.Fatal("Error template could not be read")
 		}
 
-		//fmt.Println(string(template))
 		output = string(template)
 
 		// Merge Meta
+		output = processMeta(string(markdown), output)
 
 		// Merge Elements
 		output = processElements(string(markdown), output)
 
-		// Merge Partials We have a map of these
+		// Merge Partials (we have a map of these)
 		output = processPartials(output)
 
-		fmt.Println(string(output))
-	}
+		p := pageContent{
+			Path:    dest,
+			Content: output,
+		}
 
+		// Add this page to our slice
+		pages = append(pages, p)
+	}
 }
 
 func processBlog() {
 
 }
 
+/*
 func addToSitemapAndNav(dest string) {
 	element := strings.Split(dest, "compiled")[1]
-	element = strings.Replace(element, string(filepath.Separator)+"index.html", "", -1)
+	element = strings.Replace(element, string(filepath.Separator)+"index.html", "/", -1)
 
 	// Add to sitemap
 	sitemapElement := conf.Domain + element
@@ -130,42 +168,26 @@ func addToSitemapAndNav(dest string) {
 
 	// Add to nav
 	navElement := strings.Replace(element, ".html", "", -1)
-	nav = append(nav, navElement)
-}
+    n:= NavigationContent{
+        Text: pa
+    }
 
+	//nav = append(nav, navElement)
+}
+*/
 func processFile(source string, dest string, contentType string) (err error) {
 	dest = strings.Replace(dest, ".md", ".html", -1)
 
 	// Add to sitemap and nav
-	addToSitemapAndNav(dest)
+	//addToSitemapAndNav(dest)
 
 	switch contentType {
 	case "page":
-		processPageFile(source)
+		processPageFile(source, dest)
 	case "blog":
 		//processBlogFile(sourceFile)
 	}
-
-	/*
-		destfile, err := os.Create(dest)
-		if err != nil {
-			return err
-		}
-
-		defer destfile.Close()
-	*/
-	// At this point we have an empty file we can write to
-
-	/*
-		_, err = io.Copy(destfile, sourcefile)
-		if err == nil {
-			sourceinfo, err := os.Stat(source)
-			if err != nil {
-				err = os.Chmod(dest, sourceinfo.Mode())
-			}
-		}*/
 	return
-
 }
 
 func processDir(source string, dest string, contentType string) (err error) {
@@ -205,43 +227,35 @@ func processDir(source string, dest string, contentType string) (err error) {
 	return
 }
 
-/*
-func processPartial(filename string, markdown string, template string) string {
-	// THis is our regex \*\*\*\s([a-zA-Z0-9]*)\s.*\n([\d\D][^\*]*)\*\*\*  (needs g modifier) to pick out the name and markdown from the mark down files
-	// Merge the files!!
+func reflectField(pageConf *pageConfig, field string) string {
+	r := reflect.ValueOf(pageConf.Meta)
+	f := reflect.Indirect(r).FieldByName("Title")
+	//fmt.Println(f)
+	return string(f.String())
+}
 
-	var partialOutput string
+func processMeta(markdown string, template string) string {
 
-	// Parse element tags in template with regex
-	var templateToken = regexp.MustCompile(`\[\[element\sname\=\"([a-zA-Z0-9]*)\"\sdescription\=\"(.*)"]]`)
+	var output string
+
+	// Parse meta tags in template with regex
+	var templateToken = regexp.MustCompile(`\[\[meta\sname\=\"([a-zA-Z0-9]*)\"\s*]]`)
 	templateTokens := templateToken.FindAllStringSubmatch(string(template), -1)
 
-	// Parse element tags in markdown file with regex
-	var markdownToken = regexp.MustCompile(`\*\*\*\s([a-zA-Z0-9]*)\s.*\n([\d\D][^\*]*)\*\*\*`)
-	markdownTokens := markdownToken.FindAllStringSubmatch(string(markdown), -1)
+	// Range over all the template tokens
+	for i := range templateTokens {
+		token := strings.ToLower(templateTokens[i][1])
+		upperFirstToken := upperFirst(token)
+		tokenValue := reflectField(&pageConf, upperFirstToken)
 
-	// Range over all the markdown tokens
-	for i := range markdownTokens {
-		token := strings.ToLower(markdownTokens[i][1])
-
-		// Process Markdown content ready for inclusion
-		htmlContent := string(blackfriday.MarkdownCommon([]byte(markdownTokens[i][2])))
-
-		if token == strings.ToLower(templateTokens[i][1]) {
-			// We have a match
-			description := templateTokens[i][2]
-			// What to replace
-			replace := "[[element name=\"" + token + "\" description=\"" + description + "\"]]"
-			// Replace
-			template = strings.Replace(template, replace, htmlContent, -1)
-		}
+		replace := "[[meta name=\"" + token + "\"]]"
+		template = strings.Replace(template, replace, tokenValue, -1)
 	}
-	partialOutput = template
+	output = template
 
 	// Return a merged string
-	return partialOutput
+	return output
 }
-*/
 
 func processPartials(template string) string {
 	var output string
@@ -382,6 +396,36 @@ func copyThemeAssets() {
 	}
 }
 
+func writePages() {
+
+	/*
+		destfile, err := os.Create(dest)
+		if err != nil {
+			return err
+		}
+
+		defer destfile.Close()
+	*/
+	// At this point we have an empty file we can write to
+
+	/*
+		_, err = io.Copy(destfile, sourcefile)
+		if err == nil {
+			sourceinfo, err := os.Stat(source)
+			if err != nil {
+				err = os.Chmod(dest, sourceinfo.Mode())
+			}
+		}*/
+}
+
+func makeNav() string {
+	html := ""
+	for i := range navigationItems {
+		fmt.Println(navigationItems[i])
+	}
+	return html
+}
+
 func buildProject() {
 	// Establish target directory based on project, check to ensure 'config.toml' exists
 
@@ -463,7 +507,7 @@ func buildProject() {
 	//processDir()
 
 	// Make Navigation
-	//nav := makeNav()
+	_ = makeNav()
 
 	// Write pages, replacing navigation token
 	//writePages(nav)

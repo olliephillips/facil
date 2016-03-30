@@ -27,6 +27,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"unicode"
+	"unicode/utf8"
 )
 
 var basePath string
@@ -127,4 +129,12 @@ func deleteDirectoryContents(dir string) {
 	if err != nil {
 		log.Fatal("Error site static files could not be deleted")
 	}
+}
+
+func upperFirst(s string) string {
+	if s == "" {
+		return ""
+	}
+	r, n := utf8.DecodeRuneInString(s)
+	return string(unicode.ToUpper(r)) + s[n:]
 }
