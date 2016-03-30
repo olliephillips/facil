@@ -169,6 +169,7 @@ func processPageFile(page string, dest string) {
 
 		// Add this page to our slice
 		pages = append(pages, p)
+
 	}
 }
 
@@ -178,9 +179,6 @@ func processBlog() {
 
 func processFile(source string, dest string, contentType string) (err error) {
 	dest = strings.Replace(dest, ".md", ".html", -1)
-
-	// Add to sitemap and nav
-	//addToSitemapAndNav(dest)
 
 	switch contentType {
 	case "page":
@@ -196,6 +194,7 @@ func processDir(source string, dest string, contentType string) (err error) {
 	sourceinfo, err := os.Stat(source)
 	if err != nil {
 		return err
+
 	}
 
 	// Create dest dir
@@ -206,7 +205,6 @@ func processDir(source string, dest string, contentType string) (err error) {
 
 	directory, _ := os.Open(source)
 	objects, err := directory.Readdir(-1)
-
 	for _, obj := range objects {
 		sourcefilepointer := source + string(filepath.Separator) + obj.Name()
 		destinationfilepointer := dest + string(filepath.Separator) + obj.Name()
@@ -231,7 +229,6 @@ func processDir(source string, dest string, contentType string) (err error) {
 func reflectField(pageConf *pageConfig, field string) string {
 	r := reflect.ValueOf(pageConf.Meta)
 	f := reflect.Indirect(r).FieldByName("Title")
-	//fmt.Println(f)
 	return string(f.String())
 }
 
@@ -398,25 +395,26 @@ func copyThemeAssets() {
 }
 
 func writePages(nav string) {
+	// We have a slice struct of pages (package global) with all the info we need
 
-	/*
-		destfile, err := os.Create(dest)
+	// We need to add our nav, we've parsed all the pages and built it, so this is first opportunity
+	// the token to replace is [[navigation]]
+
+	// We then need to write the pages to their correct location in the compiled directory
+	for i := range pages {
+		content := pages[i].Content
+		dest := pages[i].Path
+
+		// Do replacement of [[navigation]]
+		content = strings.Replace(content, "[[navigation]]", nav, -1)
+
+		// Write page
+		err := ioutil.WriteFile(dest, []byte(content), 0755)
 		if err != nil {
-			return err
+			log.Fatal("Error unable to write a static file")
 		}
+	}
 
-		defer destfile.Close()
-	*/
-	// At this point we have an empty file we can write to
-
-	/*
-		_, err = io.Copy(destfile, sourcefile)
-		if err == nil {
-			sourceinfo, err := os.Stat(source)
-			if err != nil {
-				err = os.Chmod(dest, sourceinfo.Mode())
-			}
-		}*/
 }
 
 func makeNav() string {

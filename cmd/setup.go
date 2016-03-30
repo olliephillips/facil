@@ -51,12 +51,24 @@ func addDefaultTheme() {
 <html>
     <head>
         <title>[[meta name="title"]]</title>
-        [[meta name="description"]]
+        <meta name="description" content="[[meta name="description"]]">
+        <meta name="anything" content="[[meta name="random"]]"
     </head>
     <body>
-        <p>This is the default template</p>
-        <p>[[element name="introduction" description="A short introductory paragraph"]]<p>
-        [[partial name="footer"]]
+        <div id="nav">
+            [[navigation]]
+        </div>
+        <div id="body">
+            <div id="title">
+                [[element name="title" description="Set the title"]]
+            </div>
+            <div id="intro">
+                [[element name="introduction" description="Add an introductory paragraph"]]
+            </div>
+            <div id="footer>"
+                [[partial name="footer"]]
+            </div>
+        </div>
     </body>
 </html>
     `
