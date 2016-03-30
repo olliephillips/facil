@@ -28,6 +28,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -80,11 +82,28 @@ var pageConf pageConfig
 var partialsOutput map[string]string
 
 var pages []pageContent
-var navigationItems []navigationContent
+
 var siteMap []string
 var nav []string
 
 //var navHTML string
+type navigationItems []navigationContent
+
+var navElements navigationItems
+
+func (slice navigationItems) Len() int {
+	return len(slice)
+}
+
+func (slice navigationItems) Less(i, j int) bool {
+	first, _ := strconv.Atoi(slice[i].Order)
+	second, _ := strconv.Atoi(slice[j].Order)
+	return int(first) < int(second)
+}
+
+func (slice navigationItems) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
+}
 
 func processPageFile(page string, dest string) {
 	var output string
@@ -115,14 +134,14 @@ func processPageFile(page string, dest string) {
 
 		// Add to nav
 		navElement := strings.Replace(element, ".html", "", -1)
-		fmt.Println(pageConf.Navigation.Text)
 
 		nav := navigationContent{
 			Text:  pageConf.Navigation.Text,
 			Order: pageConf.Navigation.Order,
 			Link:  navElement,
 		}
-		navigationItems = append(navigationItems, nav)
+
+		navElements = append(navElements, nav)
 
 		// Read template from theme
 		pageTemplate := relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + conf.Theme + string(filepath.Separator) + pageConf.Design.Template + ".html"
@@ -157,24 +176,6 @@ func processBlog() {
 
 }
 
-/*
-func addToSitemapAndNav(dest string) {
-	element := strings.Split(dest, "compiled")[1]
-	element = strings.Replace(element, string(filepath.Separator)+"index.html", "/", -1)
-
-	// Add to sitemap
-	sitemapElement := conf.Domain + element
-	siteMap = append(siteMap, sitemapElement)
-
-	// Add to nav
-	navElement := strings.Replace(element, ".html", "", -1)
-    n:= NavigationContent{
-        Text: pa
-    }
-
-	//nav = append(nav, navElement)
-}
-*/
 func processFile(source string, dest string, contentType string) (err error) {
 	dest = strings.Replace(dest, ".md", ".html", -1)
 
@@ -419,10 +420,54 @@ func writePages() {
 }
 
 func makeNav() string {
-	html := ""
-	for i := range navigationItems {
-		fmt.Println(navigationItems[i])
+	html := "<ul>\n"
+	// Sort elements
+	sort.Sort(navElements)
+
+	var curLevel, prevLevel int
+	prevLevel = 2
+	for i := range navElements {
+		// Need to reorder based on order struct properties
+		text := navElements[i].Text
+		link := navElements[i].Link
+		//order := navElements[i].Order
+
+		linkElements := strings.Split(link, "/")
+		elementsCount := len(linkElements)
+
+		if elementsCount == 3 {
+			curLevel = 3
+		} else {
+			curLevel = 2
+		}
+
+		fmt.Println("cur:", curLevel)
+		fmt.Println("prev:", prevLevel)
+
+		if curLevel == 2 && prevLevel == 3 {
+			html += "\t\t</ul>\n\t</li>\n"
+			html += "\t<li><a href=\"" + link + "\">" + text + "</a></li>\n"
+		}
+		/*
+			if curLevel == 2 {
+
+			}
+		*/
+		if curLevel == 3 && prevLevel == 2 {
+			html += "\t<li><a href=\"" + link + "\">" + text + "</a>\n"
+			html += "\t\t<ul>\n"
+
+		}
+		if curLevel == 2 && prevLevel == 2 {
+			html += "\t<li><a href=\"" + link + "\">" + text + "</a></li>\n"
+		}
+		if curLevel == 3 && prevLevel == 3 {
+			html += "\t\t\t<li><a href=\"" + link + "\">" + text + "</a></li>\n"
+		}
+		prevLevel = curLevel
 	}
+	html += "</ul>"
+	fmt.Println(html)
 	return html
 }
 

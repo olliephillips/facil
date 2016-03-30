@@ -80,7 +80,7 @@ func createMarkdownTemplate(template string, filename string, isPage bool) {
 			// Add navigation tokens
 			fileOutput += "\n[Navigation]\n"
 			fileOutput += "text = \"\"\n"
-			fileOutput += "order = \"0\"\n"
+			fileOutput += "order = \"99\"\n"
 
 			// Add design tokens
 			fileOutput += "\n[Design]\n"
