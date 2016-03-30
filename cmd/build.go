@@ -34,29 +34,90 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var project string
-var relPath string
-var projectDir string
-var conf config
-
-var partialsOutput map[string]string
-
-var siteMap []string
-var nav []string
+type page struct {
+	Path    string
+	Content string
+}
 
 type config struct {
 	Domain string
 	Theme  string
 }
 
+type pageConfig struct {
+	Meta   meta
+	Design design
+}
+
+type meta struct {
+	Title         string
+	Description   string
+	Draft         bool
+	PublishedDate string
+}
+
+type design struct {
+	Template string
+}
+
+var project string
+var relPath string
+var projectDir string
+var conf config
+var pageConf pageConfig
+
+var partialsOutput map[string]string
+
+var pages []page
+var siteMap []string
+var nav []string
+
 func processPageFile(page string) {
 	// Get the template from file
+	markdown, err := ioutil.ReadFile(page)
+	if err != nil {
+		log.Fatal("Error page could not be built")
+	}
+	//
 
+	var markdownToml = regexp.MustCompile(`\+\+\+\n*([\d\D]*)\n*\+\+\+`)
+	tomlSection := markdownToml.FindStringSubmatch(string(markdown))
+
+	//fmt.Println(string(markdown))
+	//toml := strings.Split(string(markdown), "+++")
+
+	// Read the toml config of each markdown file
+	/**/
+
+	if len(tomlSection) > 1 {
+		//fmt.Println("Page:", page, "\nToml:", tomlSection[1])
+		if _, err := toml.Decode(tomlSection[1], &pageConf); err != nil {
+			//log.Fatal("Error cannot parse page's toml config")
+			log.Fatal(err)
+		}
+		fmt.Println(pageConf.Meta.Title)
+	}
 	// Read template from theme
 
 	// Merge markdown file and template file into new output
 
 	// Write new file to complied folder
+
+	// Get markdown pages iterate subdirectories to understand nav hierarchy
+
+	// Build a special nav/menu partial
+
+	// Read the toml config of each markdown file
+
+	// Read all the markdown tokens to map
+
+	// Get the template to use
+
+	// Process any partials
+
+	// Process token replacements
+
+	// Write a page in the format directory_path/page_title/index.html
 }
 
 func processBlog() {
@@ -83,19 +144,20 @@ func processFile(source string, dest string, contentType string) (err error) {
 	addToSitemapAndNav(dest)
 
 	switch contentType {
-	case "pages":
+	case "page":
 		processPageFile(source)
 	case "blog":
-		//processBlog(sourceFile)
+		//processBlogFile(sourceFile)
 	}
 
-	destfile, err := os.Create(dest)
-	if err != nil {
-		return err
-	}
+	/*
+		destfile, err := os.Create(dest)
+		if err != nil {
+			return err
+		}
 
-	defer destfile.Close()
-
+		defer destfile.Close()
+	*/
 	// At this point we have an empty file we can write to
 
 	/*
@@ -107,6 +169,7 @@ func processFile(source string, dest string, contentType string) (err error) {
 			}
 		}*/
 	return
+
 }
 
 func processDir(source string, dest string, contentType string) (err error) {
@@ -126,8 +189,8 @@ func processDir(source string, dest string, contentType string) (err error) {
 	objects, err := directory.Readdir(-1)
 
 	for _, obj := range objects {
-		sourcefilepointer := source + "/" + obj.Name()
-		destinationfilepointer := dest + "/" + obj.Name()
+		sourcefilepointer := source + string(filepath.Separator) + obj.Name()
+		destinationfilepointer := dest + string(filepath.Separator) + obj.Name()
 
 		if obj.IsDir() {
 			// Create sub-directories - recursively
@@ -144,27 +207,6 @@ func processDir(source string, dest string, contentType string) (err error) {
 		}
 	}
 	return
-}
-
-func buildPages() {
-
-	// Get markdown pages iterate subdirectories to understand nav hierarchy
-
-	processDir(relPath+projectDir+string(filepath.Separator)+"pages", relPath+projectDir+string(filepath.Separator)+"compiled", "page")
-
-	// Build a special nav/menu partial
-
-	// Read the toml config of each markdown file
-
-	// Read all the markdown tokens to map
-
-	// Get the template to use
-
-	// Process any partials
-
-	// Process token replacements
-
-	// Write a page in the format directory_path/page_title/index.html
 }
 
 func processPartial(filename string, markdown string, template string) string {
@@ -357,15 +399,21 @@ func buildProject() {
 	//fmt.Println(partialsOutput)
 
 	// Build Pages
-	buildPages()
+	processDir(relPath+projectDir+string(filepath.Separator)+"pages", relPath+projectDir+string(filepath.Separator)+"compiled", "page")
 
 	// Traverse projects blog folder
 	// Each blog file
-	//go buildBlogs()
+	//processDir()
 
-	// Should have a map/slice of pages to include navigation on
-	// Do this for each page and write it to compiled directory
+	// Make Navigation
+	//nav := makeNav()
+
+	// Write pages, replacing navigation token
+	//writePages(nav)
+
 	// WHat about nav order override?
+
+	// Write a sitemap.xml
 }
 
 // buildCmd represents the build command

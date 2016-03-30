@@ -95,8 +95,8 @@ func copyDir(source string, dest string) (err error) {
 	objects, err := directory.Readdir(-1)
 
 	for _, obj := range objects {
-		sourcefilepointer := source + "/" + obj.Name()
-		destinationfilepointer := dest + "/" + obj.Name()
+		sourcefilepointer := source + string(filepath.Separator) + obj.Name()
+		destinationfilepointer := dest + string(filepath.Separator) + obj.Name()
 
 		if obj.IsDir() {
 			// Create sub-directories - recursively
