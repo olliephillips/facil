@@ -73,51 +73,47 @@ var siteMap []string
 var nav []string
 
 func processPageFile(page string) {
+	var output string
+
 	// Get the template from file
 	markdown, err := ioutil.ReadFile(page)
 	if err != nil {
 		log.Fatal("Error page could not be built")
 	}
-	//
 
+	// Process toml
 	var markdownToml = regexp.MustCompile(`\+\+\+\n*([\d\D]*)\n*\+\+\+`)
 	tomlSection := markdownToml.FindStringSubmatch(string(markdown))
 
-	//fmt.Println(string(markdown))
-	//toml := strings.Split(string(markdown), "+++")
-
-	// Read the toml config of each markdown file
-	/**/
-
 	if len(tomlSection) > 1 {
-		//fmt.Println("Page:", page, "\nToml:", tomlSection[1])
 		if _, err := toml.Decode(tomlSection[1], &pageConf); err != nil {
 			//log.Fatal("Error cannot parse page's toml config")
 			log.Fatal(err)
 		}
-		fmt.Println(pageConf.Meta.Title)
+		fmt.Println(pageConf.Design.Template)
+
+		// Read template from theme
+		pageTemplate := relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + conf.Theme + string(filepath.Separator) + pageConf.Design.Template + ".html"
+
+		template, err := ioutil.ReadFile(pageTemplate)
+		if err != nil {
+			log.Fatal("Error template could not be read")
+		}
+
+		//fmt.Println(string(template))
+		output = string(template)
+
+		// Merge Meta
+
+		// Merge Elements
+		output = processElements(string(markdown), output)
+
+		// Merge Partials We have a map of these
+		output = processPartials(output)
+
+		fmt.Println(string(output))
 	}
-	// Read template from theme
 
-	// Merge markdown file and template file into new output
-
-	// Write new file to complied folder
-
-	// Get markdown pages iterate subdirectories to understand nav hierarchy
-
-	// Build a special nav/menu partial
-
-	// Read the toml config of each markdown file
-
-	// Read all the markdown tokens to map
-
-	// Get the template to use
-
-	// Process any partials
-
-	// Process token replacements
-
-	// Write a page in the format directory_path/page_title/index.html
 }
 
 func processBlog() {
@@ -209,6 +205,7 @@ func processDir(source string, dest string, contentType string) (err error) {
 	return
 }
 
+/*
 func processPartial(filename string, markdown string, template string) string {
 	// THis is our regex \*\*\*\s([a-zA-Z0-9]*)\s.*\n([\d\D][^\*]*)\*\*\*  (needs g modifier) to pick out the name and markdown from the mark down files
 	// Merge the files!!
@@ -243,6 +240,66 @@ func processPartial(filename string, markdown string, template string) string {
 
 	// Return a merged string
 	return partialOutput
+}
+*/
+
+func processPartials(template string) string {
+	var output string
+
+	// Parse partial tags in template with regex
+	var templateToken = regexp.MustCompile(`\[\[partial\sname\=\"([a-zA-Z0-9]*)\"\s*]]`)
+	templateTokens := templateToken.FindAllStringSubmatch(string(template), -1)
+
+	// We have a map loaded with all processed partials
+	// Range over template tokens and find replace with corresponding value from map
+	for i := range templateTokens {
+		token := templateTokens[i][1]
+		if partialsOutput[token] != "" {
+			// We have a processed partial stored, do find replace
+			replace := "[[partial name=\"" + token + "\"]]"
+			template = strings.Replace(template, replace, partialsOutput[token], -1)
+		}
+	}
+	output = template
+
+	// Return a merged string
+	return output
+}
+
+func processElements(markdown string, template string) string {
+	// THis is our regex \*\*\*\s([a-zA-Z0-9]*)\s.*\n([\d\D][^\*]*)\*\*\*  (needs g modifier) to pick out the name and markdown from the mark down files
+	// Merge the files!!
+
+	var output string
+
+	// Parse element tags in template with regex
+	var templateToken = regexp.MustCompile(`\[\[element\sname\=\"([a-zA-Z0-9]*)\"\sdescription\=\"(.*)"]]`)
+	templateTokens := templateToken.FindAllStringSubmatch(string(template), -1)
+
+	// Parse element tags in markdown file with regex
+	var markdownToken = regexp.MustCompile(`\*\*\*\s([a-zA-Z0-9]*)\s.*\n([\d\D][^\*]*)\*\*\*`)
+	markdownTokens := markdownToken.FindAllStringSubmatch(string(markdown), -1)
+
+	// Range over all the markdown tokens
+	for i := range markdownTokens {
+		token := strings.ToLower(markdownTokens[i][1])
+
+		// Process Markdown content ready for inclusion
+		htmlContent := string(blackfriday.MarkdownCommon([]byte(markdownTokens[i][2])))
+
+		if token == strings.ToLower(templateTokens[i][1]) {
+			// We have a match
+			description := templateTokens[i][2]
+			// What to replace
+			replace := "[[element name=\"" + token + "\" description=\"" + description + "\"]]"
+			// Replace
+			template = strings.Replace(template, replace, htmlContent, -1)
+		}
+	}
+	output = template
+
+	// Return a merged string
+	return output
 }
 
 func buildPartials() {
@@ -285,7 +342,7 @@ func buildPartials() {
 
 	// Range over one of the maps, pass name and both the markdown and template as args to processPartial()
 	for k := range partialsMarkdown {
-		partialsOutput[k] = processPartial(k, partialsMarkdown[k], partialsTemplate[k])
+		partialsOutput[k] = processElements(partialsMarkdown[k], partialsTemplate[k])
 	}
 }
 
