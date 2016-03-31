@@ -37,60 +37,64 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type pageContent struct {
-	Path    string
-	Content string
-}
+type (
+	config struct {
+		Domain string
+		Theme  string
+	}
 
-type navigationContent struct {
-	Text  string
-	Order string
-	Link  string
-}
+	pageConfig struct {
+		Meta       meta
+		Navigation navigation
+		Design     design
+	}
 
-type config struct {
-	Domain string
-	Theme  string
-}
+	pageContent struct {
+		Path    string
+		Content string
+	}
 
-type pageConfig struct {
-	Meta       meta
-	Navigation navigation
-	Design     design
-}
+	// TOML parsing structs
+	meta struct {
+		Title       string `toml:"title"`
+		Description string `toml:"description"`
+		Keywords    string `toml:"keywords"`
+		Author      string `toml:"author"`
+	}
 
-type meta struct {
-	Title       string `toml:"title"`
-	Description string `toml:"description"`
-}
+	navigation struct {
+		Text  string
+		Order string
+	}
 
-type navigation struct {
-	Text  string
-	Order string
-}
+	design struct {
+		Template string
+	}
 
-type design struct {
-	Template string
-}
+	// Navigation building
+	navigationContent struct {
+		Text  string
+		Order string
+		Link  string
+	}
 
-var project string
-var relPath string
-var projectDir string
-var conf config
-var pageConf pageConfig
+	navigationItems []navigationContent
+)
 
-var partialsOutput map[string]string
+var (
+	project        string
+	relPath        string
+	projectDir     string
+	conf           config
+	pageConf       pageConfig
+	partialsOutput map[string]string
+	pages          []pageContent
+	siteMap        []string
+	nav            []string
+	navElements    navigationItems
+)
 
-var pages []pageContent
-
-var siteMap []string
-var nav []string
-
-//var navHTML string
-type navigationItems []navigationContent
-
-var navElements navigationItems
-
+// Implement sort interface on navigationItems
 func (slice navigationItems) Len() int {
 	return len(slice)
 }
@@ -228,7 +232,7 @@ func processDir(source string, dest string, contentType string) (err error) {
 
 func reflectField(pageConf *pageConfig, field string) string {
 	r := reflect.ValueOf(pageConf.Meta)
-	f := reflect.Indirect(r).FieldByName("Title")
+	f := reflect.Indirect(r).FieldByName(field)
 	return string(f.String())
 }
 

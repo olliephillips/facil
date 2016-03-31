@@ -55,7 +55,8 @@ func addDefaultTheme() error {
     <head>
         <title>[[meta name="title"]]</title>
         <meta name="description" content="[[meta name="description"]]">
-        <meta name="anything" content="[[meta name="random"]]"
+        <meta name="keywords" content="[[meta name="keywords"]]"
+        <meta name="author" content="[[meta name="author"]]"
     </head>
     <body>
         <div id="nav">

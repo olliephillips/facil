@@ -49,7 +49,17 @@ Facil reads template files and understands the following included placeholders/t
 Meta tokens store information about a page. They are formatted as follows:-
 
 ```
-[[meta name="whatever"]]
+[[meta name="title"]]
+
+```
+
+Currently, these tokens are supported:-
+
+```
+[[meta name="title"]]
+[[meta name="description"]]
+[[meta name="keywords"]]
+[[meta name="author"]]
 ```
 
 Within a theme template you might add a Meta token to the ```<title/>``` element like this:-
@@ -90,7 +100,8 @@ The below demonstrates how the above tokens are used in a template html file
     <head>
         <title>[[meta name="title"]]</title>
         <meta name="description" content="[[meta name="description"]]">
-        <meta name="anything" content="[[meta name="random"]]"
+        <meta name="keywords" content="[[meta name="keywords"]]"
+        <meta name="author" content="[[meta name="author"]]"
     </head>
     <body>
         <div id="nav">
@@ -154,7 +165,8 @@ Assuming, the example template html shown above was the `default.html` template 
 [Meta]
 title = ""
 description = ""
-random = ""
+keywords = ""
+author = ""
 
 [Navigation]
 text = ""
