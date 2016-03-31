@@ -125,6 +125,10 @@ Work in progress..
 - Use it myself
 - Maybe extend to include blog type copy
 
+## Why static websites?
+
+Amongst other things, speed, security and simple hosting requirements are key reasons for hosting static rather than dynamic pages.
+
 ## Did you know
 
 Did you know, 'facil' means 'easy' in Catalan?
