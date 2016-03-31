@@ -28,15 +28,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func createFolders() {
+func createFolders() error {
 	err := os.Mkdir(basePath+"themes", 0755)
 	err = os.Mkdir(basePath+"sites", 0755)
 	if err != nil {
-		log.Fatal("Error creating directories")
+		return err
 	}
+	return
 }
 
-func addDefaultTheme() {
+func addDefaultTheme() error {
 	// Folder paths to create
 	paths := []string{
 		"themes" + string(filepath.Separator) + "default",
@@ -83,21 +84,26 @@ some css
 	const partialFooter = `
 <div>[[element name="footer" description="A reuseable footer element"]]</div>
     `
-
 	// Create folder structure
 	for i := range paths {
 		err := os.Mkdir(basePath+paths[i], 0755)
 		if err != nil {
-			log.Fatal("Error creating directories")
+			return err
 		}
 	}
 
 	// Write 'default' theme files
 	defaultThemePath := basePath + "themes" + string(filepath.Separator) + "default" + string(filepath.Separator)
-	writeFile(defaultThemePath+"default.html", defaultHTML)
-	writeFile(defaultThemePath+"js"+string(filepath.Separator)+"facil.js", defaultJS)
-	writeFile(defaultThemePath+"css"+string(filepath.Separator)+"facil.css", defaultCSS)
-	writeFile(defaultThemePath+"partials"+string(filepath.Separator)+"footer.html", partialFooter)
+	err := writeFile(defaultThemePath+"default.html", defaultHTML)
+	err = writeFile(defaultThemePath+"js"+string(filepath.Separator)+"facil.js", defaultJS)
+	err = writeFile(defaultThemePath+"css"+string(filepath.Separator)+"facil.css", defaultCSS)
+	err = writeFile(defaultThemePath+"partials"+string(filepath.Separator)+"footer.html", partialFooter)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // setupCmd represents the setup command
@@ -108,11 +114,20 @@ var setupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Check not already exist
 		if !dirExist(basePath+"themes") && !dirExist(basePath+"sites") {
-			createFolders()
+			// Create required folders
+			err := createFolders()
+			if err != nil {
+				log.Fatal("Error could not create 'sites' or 'themes' directories")
+			}
 		}
+
 		// Check default theme not already exist
 		if !dirExist(basePath + "themes" + string(filepath.Separator) + "default") {
-			addDefaultTheme()
+			// Add default theme to themes folder
+			err := addDefaultTheme()
+			if err != nil {
+				log.Fatal("Error could not create default theme in themes directory")
+			}
 		}
 	},
 }

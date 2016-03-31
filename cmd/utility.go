@@ -41,11 +41,12 @@ func setBasePath() {
 	}
 }
 
-func writeFile(filename string, content string) {
+func writeFile(filename string, content string) error {
 	err := ioutil.WriteFile(filename, []byte(content), 0755)
 	if err != nil {
-		log.Fatal("Error writing file: " + filename)
+		return err
 	}
+	return nil
 }
 
 func dirExist(path string) bool {
