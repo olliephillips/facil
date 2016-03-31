@@ -31,8 +31,7 @@ A theme is a collection of template files, js, and CSS assets.
 New themes should be added to the ```/themes``` directory. Only a ```default.html``` template is mandatory.  Partial templates should be placed in a `partials` folder. A an example of simple structure with one footer.html partial template and theme js, CSS and image assets, would be:
 
 - theme_name/
-  - partials/
-   -- footer.html
+  - partials/footer.html
   - css/
   - js/
   - images/
