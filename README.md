@@ -32,7 +32,7 @@ New themes should be added to the ```/themes``` directory. Only a ```default.htm
 
 - theme_name/
   - partials/
-   - footer.html
+   -- footer.html
   - css/
   - js/
   - images/
