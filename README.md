@@ -48,7 +48,21 @@ Within a theme template you might add a Meta token to the ```<title/>``` element
 <title>[[meta name="title"]]</title>
 ```
 
-### TOML/Markdown files
+### Navigation token
+This token, when found in a template, will be replaced with a HTML unordered list of navigation options
+
+```
+[[navigation]]
+
+```
+### Element tokens
+Elements can provide copy for any HTML element in a template. To add a token something like this to your template
+
+
+```
+[[element name="title" description="Set the title"]]
+```
+## TOML/Markdown files
 
 Work in progress.. 
 
