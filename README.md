@@ -83,7 +83,7 @@ Partial tokens allow the inclusion of content that is used in multiple places in
 
 #### Example template html
 
-The below demonstrates how the above tokens are uses in a template html file
+The below demonstrates how the above tokens are used in a template html file
 
 ```
 <html>
