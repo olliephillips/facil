@@ -26,6 +26,32 @@ Currently Facil exposes the following command set:-
 
 - ```facil page --template page-name``` : (NOT YET IMPLEMENTED) The intent is to scaffold a new toml/markdown page based on the chosen theme template.
 
+## Themes
+A theme is a collection of template files, js, and CSS assets.
+
+## Template files
+
+Template files belong to a theme. They are basically just HTML files within which are some special placeholders, often referred to as "tokens"
+
+Facil reads template files and understands the following included placeholders/tokens (referred to as tokens from now):
+
+### Meta tokens
+Meta tokens store information about a page. They are formatted as follows:-
+
+```
+[[meta name="whatever"]]
+```
+
+Within a theme template you might add a Meta token to the ```<title/>``` element like this:-
+
+```
+<title>[[meta name ="title"]]</title>
+```
+
+### Toml/Markdown files
+
+
+
 ## Roadmap
 
 - Finish it
