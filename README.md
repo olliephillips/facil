@@ -3,10 +3,9 @@
 ## Overview 
 Most static website generators focus on blog copy - and why not, blog publishing is hard to do easily. 
 
-Facil is my (experimental) static website generator which focusses on normal websites. You know the ones that are not blogs.
+Facil is my (experimental) static website generator which focusses on normal websites. You know, the ones that are not blogs.
 
-Facil is very early stage, but all the concepts I seem to need are proven and roughly working. The code is quite ugly however.
-
+Facil is very early stage, but all the concepts I seem to need are proven and roughly working. The code is currently quite ugly however.
 
 ## Installing
 
@@ -29,6 +28,16 @@ Currently Facil exposes the following command set:-
 ## Themes
 A theme is a collection of template files, js, and CSS assets.
 
+New themes should be added to the ```/themes``` directory. Only a ```default.html``` template is mandatory.  Partial templates should be placed in a `partials` folder. A an example of simple structure with one footer.html partial template and theme js, CSS and image assets, would be:
+
+- theme_name/
+  - partials/
+   - footer.html
+  - css/
+  - js/
+  - images/
+  - default.html
+  
 ## Template files
 
 Template files belong to a theme. A theme must have a minimum of one tempate file, named ```default.html``` though it can have as many as desired.They are basically just HTML files within which are some special placeholders, often referred to as "tokens"
@@ -113,6 +122,7 @@ Work in progress..
 - Refactor it, with testing in mind
 - Add tests
 - Use it myself
+- Maybe extend to include blog type copy
 
 ## Did you know
 
