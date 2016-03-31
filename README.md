@@ -133,17 +133,51 @@ Working through each:
 
 The `compiled` directory is where the built site will be placed. The build process basically merges the TOML/markdown files with the chosen template, to create a new pure HTML file.
 
-The `pages` directory is where all your TOML/markdown files go. Each is a page on your site. When a new site is scaffolded, the chosen themes `default.html` template is used to create `index.md` in this folder. This will become index.html, or the homepage of the website.  We look at the format of the TOML/markdown files below.
+The `pages` directory is where all your TOML/markdown files go. Each is a page on your site. When a new site is scaffolded, the chosen themes `default.html` template is used to create `index.md` in this folder. This will become index.html, or the homepage of the website, when the site is built.  We look at the format of the TOML/markdown files below.
 
-The `partials` directory will include one markdown file for each partial template in the theme. Here we have just the a footer.md file. There is no TOML config information in a partial markdown file.
+The `partials` directory will include one markdown file for each partial template in the theme. Here we have just a `footer.md` file. There is no TOML config information in a partial markdown file.
 
-The `theme` directory contains the theme in use with this site. It is copied from the `themes` folder so that site level customizations can be made. In the example the theme is the `default` theme.
+The `theme` directory contains the theme in use with this site. It is copied from the `themes` folder so that site level customizations can be made to the theme. In this example the theme is the `default` theme.
 
-`config.toml` is a file containing the site's domain and chosen theme, it is also automatically generated.
+`config.toml` is a file containing information about the site's domain and chosen theme, it is also automatically generated.
  
 
 ## TOML/Markdown files
-Work in progress.. 
+
+Our TOML/Markdown files have the .md file extension. `index.md` is created when the site is first scaffolded. Additional files can be created manually, or better yet with the `facil page` command.
+
+Assuming, the example template html shown above was the `default.html` template in the theme, the following content would be generated in `pages/index.md`:-
+
+```
++++
+
+[Meta]
+title = ""
+description = ""
+random = ""
+
+[Navigation]
+text = ""
+order = "99"
+
+[Design]
+template = "default"
+
++++
+
+*** Title (Set the title)
+
+# Your Title markdown syntax here
+
+***
+
+*** Introduction (Add an introductory paragraph)
+
+# Your Introduction markdown syntax here
+
+***
+
+```
 
 ## Roadmap
 
