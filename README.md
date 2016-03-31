@@ -26,9 +26,10 @@ Currently Facil exposes the following command set:-
 - ```facil page --template page-name``` : (NOT YET IMPLEMENTED) The intent is to scaffold a new TOML/markdown page based on the chosen theme template.
 
 ## Themes
-A theme is a collection of template files, js, and CSS assets.
+A theme is a collection of template files, JavaScript, CSS and image assets.
 
-New themes should be added to the ```/themes``` directory. Only a ```default.html``` template is mandatory.  Partial templates should be placed in a `partials` folder. A an example of simple structure with one footer.html partial template and theme js, CSS and image assets, would be:
+New themes should be added to the ```/themes``` directory. Only a ```default.html``` template is mandatory.
+Partial templates should be placed in a `partials` folder. An example of simple structure which includes two page templates, one partial template, together with JavaScript, CSS and image assets, would be:
 
 - theme_name/
   - partials/footer.html
@@ -36,6 +37,7 @@ New themes should be added to the ```/themes``` directory. Only a ```default.htm
   - js/
   - images/
   - default.html
+  - left_sidebar.html
   
 ## Template files
 
