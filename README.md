@@ -18,7 +18,7 @@ Facil provides a command line interface (CLI) for all functionality courtesy of 
 
 Currently Facil exposes the following command set:-
 
-- ```facil setup``` : creates sites and themes directory in currenty directory. Adds a (very) basic default theme to the themes folder
+- ```facil setup``` : creates sites and themes directory in current directory. Adds a (very) basic default theme to the themes folder
        
 - ```facil start --theme theme yourwebsite.domain``` : Scaffolds the directory and file structure for yourwebsite.domain into the sites directory. --theme is optional, omitting means site is scaffolded to use the default theme installed with 'facil setup' 
     
@@ -49,7 +49,7 @@ Within a theme template you might add a Meta token to the ```<title/>``` element
 ```
 
 ### Navigation token
-This token, when found in a template, will be replaced with a HTML unordered list of navigation options
+This token, when found in a template, will be replaced with a HTML unordered list of navigation options, built using the page hierarchy.
 
 ```
 [[navigation]]
