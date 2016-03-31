@@ -22,9 +22,9 @@ Currently Facil exposes the following command set:-
        
 - ```facil start --theme theme yourwebsite.domain``` : Scaffolds the directory and file structure for yourwebsite.domain into the sites directory. --theme is optional, omitting means site is scaffolded to use the default theme installed with 'facil setup' 
     
-- ```facil build yourwebsite.domain``` : Builds site, parses toml and markdown using the the specified theme template and writes built output to 'compiled' subdirectory.
+- ```facil build yourwebsite.domain``` : Builds site, parses TOML and markdown using the the specified theme template and writes built output to 'compiled' subdirectory.
 
-- ```facil page --template page-name``` : (NOT YET IMPLEMENTED) The intent is to scaffold a new toml/markdown page based on the chosen theme template.
+- ```facil page --template page-name``` : (NOT YET IMPLEMENTED) The intent is to scaffold a new TOML/markdown page based on the chosen theme template.
 
 ## Themes
 A theme is a collection of template files, js, and CSS assets.
@@ -45,10 +45,10 @@ Meta tokens store information about a page. They are formatted as follows:-
 Within a theme template you might add a Meta token to the ```<title/>``` element like this:-
 
 ```
-<title>[[meta name ="title"]]</title>
+<title>[[meta name="title"]]</title>
 ```
 
-### Toml/Markdown files
+### TOML/Markdown files
 
 Work in progress.. 
 
