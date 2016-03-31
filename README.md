@@ -100,8 +100,8 @@ The below demonstrates how the above tokens are used in a template html file
     <head>
         <title>[[meta name="title"]]</title>
         <meta name="description" content="[[meta name="description"]]">
-        <meta name="keywords" content="[[meta name="keywords"]]"
-        <meta name="author" content="[[meta name="author"]]"
+        <meta name="keywords" content="[[meta name="keywords"]]">
+        <meta name="author" content="[[meta name="author"]]">
     </head>
     <body>
         <div id="nav">
