@@ -28,15 +28,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Creates 'themes' and 'sites' directories in current working directory
 func createFolders() error {
 	err := os.Mkdir(basePath+"themes", 0755)
 	err = os.Mkdir(basePath+"sites", 0755)
 	if err != nil {
 		return err
 	}
-	return
+	return nil
 }
 
+// Adds a basic 'default' theme to themes directory
 func addDefaultTheme() error {
 	// Folder paths to create
 	paths := []string{

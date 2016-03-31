@@ -33,6 +33,7 @@ import (
 
 var basePath string
 
+// 'basePath' is a package level variable, we initialise it here
 func setBasePath() {
 	if dirExist("sites") {
 		basePath = "." + string(filepath.Separator)

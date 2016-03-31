@@ -18,6 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+// This file contains most of the functionality behind 'facil start', it scaffolds a new site, creating
+// the directory and file structure based on the chosen theme
+
 package cmd
 
 import (
@@ -33,17 +36,24 @@ import (
 
 var domain, theme string
 
-func createConfigToml() {
+// Creates a config.toml file in the new sites root directory containing canonical domain and theme the site uses
+func createConfigToml() error {
 	var fileOutput string
 	sitePath := basePath + string(filepath.Separator) + "sites" + string(filepath.Separator) + domain
 	fileOutput += "domain = \"" + domain + "\"\n"
 	fileOutput += "theme = \"" + theme + "\"\n"
 
 	// Write file
-	writeFile(sitePath+string(filepath.Separator)+"config.toml", fileOutput)
+	err := writeFile(sitePath+string(filepath.Separator)+"config.toml", fileOutput)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func createMarkdownTemplate(template string, filename string, isPage bool) {
+// Creates markdown file by parsing a template from the theme. All tokens are read from the template and setup
+// in the created markdown file
+func createMarkdownTemplate(template string, filename string, isPage bool) error {
 	themePath := basePath + string(filepath.Separator) + "sites" + string(filepath.Separator) + domain + string(filepath.Separator) + "theme" + string(filepath.Separator) + theme
 	sitePath := basePath + string(filepath.Separator) + "sites" + string(filepath.Separator) + domain
 	if !dirExist(themePath) {
@@ -60,7 +70,7 @@ func createMarkdownTemplate(template string, filename string, isPage bool) {
 		// Open template file & get contents
 		temp, err := ioutil.ReadFile(themePath + string(filepath.Separator) + template)
 		if err != nil {
-			log.Fatal("Could not open template file")
+			return err
 		}
 
 		// Is it a page or a partial template?
@@ -100,11 +110,16 @@ func createMarkdownTemplate(template string, filename string, isPage bool) {
 		}
 
 		// Write to file
-		writeFile(sitePath+string(filepath.Separator)+filename, fileOutput)
+		err = writeFile(sitePath+string(filepath.Separator)+filename, fileOutput)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func scaffoldSite() {
+// Creates a new site in the sites directory
+func scaffoldSite() error {
 	// Partials and Blog created later if needed
 	paths := []string{
 		"sites" + string(filepath.Separator) + domain,
@@ -119,7 +134,7 @@ func scaffoldSite() {
 		if !dirExist(basePath + paths[i]) {
 			err := os.Mkdir(basePath+paths[i], 0755)
 			if err != nil {
-				log.Fatal("Error creating site directories")
+				return err
 			}
 		}
 	}
@@ -132,15 +147,21 @@ func scaffoldSite() {
 	if !dirExist(dest) {
 		err := copyDir(src, dest)
 		if err != nil {
-			log.Fatal("Selected theme could not be copied to site")
+			return err
 		}
 	}
 
 	// Create config.toml file - domain, theme
-	createConfigToml()
+	err := createConfigToml()
+	if err != nil {
+		return err
+	}
 
 	// Add default markdown file and any partials - enough to render homepage
-	createMarkdownTemplate("default.html", "pages/index.md", true)
+	err = createMarkdownTemplate("default.html", "pages/index.md", true)
+	if err != nil {
+		return err
+	}
 
 	// List partials, run createMarkdownTemplate() for each
 	partialsDir := dest + string(filepath.Separator) + "partials"
@@ -149,7 +170,7 @@ func scaffoldSite() {
 		if !dirExist(basePath + "sites" + string(filepath.Separator) + domain + string(filepath.Separator) + "partials") {
 			err := os.Mkdir(basePath+"sites"+string(filepath.Separator)+domain+string(filepath.Separator)+"partials", 0755)
 			if err != nil {
-				log.Fatal("Error creating 'partials' directory")
+				return err
 			}
 		}
 		err := filepath.Walk(partialsDir, func(path string, f os.FileInfo, _ error) error {
@@ -157,37 +178,21 @@ func scaffoldSite() {
 				if strings.ToLower(strings.Split(f.Name(), ".")[1]) == "html" {
 					tempFile := "partials" + string(filepath.Separator) + f.Name()
 					mdFile := "partials" + string(filepath.Separator) + strings.Replace(f.Name(), ".html", "", -1) + ".md"
-					createMarkdownTemplate(tempFile, mdFile, false)
+
+					err := createMarkdownTemplate(tempFile, mdFile, false)
+					if err != nil {
+						return err
+					}
 				}
 			}
 			return nil
 		})
 
 		if err != nil {
-			log.Fatal("Could not parse partials templates")
+			return err
 		}
 	}
-
-	// Are there blog templates, if so handle those?
-	blogTemp := dest + string(filepath.Separator) + "blog.html"
-	blogPostTemp := dest + string(filepath.Separator) + "blog-post.html"
-	if dirExist(blogTemp) && dirExist(blogPostTemp) {
-		// Need to create a 'blog' directory
-		blogDir := basePath + "sites" + string(filepath.Separator) + domain + string(filepath.Separator) + "blog"
-		if !dirExist(blogDir) {
-			err := os.Mkdir(blogDir, 0755)
-			if err != nil {
-				log.Fatal("Error creating 'blog' directory")
-			}
-		}
-
-		// With blog.html we create a blog.md in pages
-		createMarkdownTemplate("blog.html", "pages/blog.md", true)
-
-		// With blog-post.html we create welcome-to-my-blog.md in site blog directory
-		createMarkdownTemplate("blog-post.html", "blog/welcome-to-my-blog.md", true)
-	}
-
+	return nil
 }
 
 // startCmd represents the start command
@@ -199,9 +204,17 @@ var startCmd = &cobra.Command{
     Uses --theme flag to specify theme to setup site with, or the included 'default' theme
     `,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Store domain we are scaffolding
 		domain = strings.Join(args, " ")
+
+		// Set a packpage level var for use in other functions
 		setBasePath()
-		scaffoldSite()
+
+		// Create directories and file structure
+		err := scaffoldSite()
+		if err != nil {
+			log.Fatal("Error unable to setup new site " + domain)
+		}
 	},
 }
 
