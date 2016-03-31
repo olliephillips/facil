@@ -31,7 +31,7 @@ A theme is a collection of template files, js, and CSS assets.
 
 ## Template files
 
-Template files belong to a theme. They are basically just HTML files within which are some special placeholders, often referred to as "tokens"
+Template files belong to a theme. A theme must have a minimum of one tempate file, named ```default.html``` though it can have as many as desired.They are basically just HTML files within which are some special placeholders, often referred to as "tokens"
 
 Facil reads template files and understands the following included placeholders/tokens (referred to as tokens from now):
 
@@ -56,12 +56,51 @@ This token, when found in a template, will be replaced with a HTML unordered lis
 
 ```
 ### Element tokens
-Elements can provide copy for any HTML element in a template. To add a token something like this to your template
+Elements can provide copy for any HTML element in a template. To add a token something like this to your template.
 
 
 ```
 [[element name="title" description="Set the title"]]
 ```
+
+### Partial tokens
+
+Partial tokens allow the inclusion of content that is used in multiple places in the site. For example if you have three templates, default.html, left-sidebar.html and right-sidebar, they may share some elements such as a footer. In this scenario it is sensible to use a partial to create this content once but include it in all three templates
+
+```
+[[partial name="footer"]]
+```
+
+#### Example template html
+
+The below demonstrates how the above tokens are uses in a template html file
+
+```
+<html>
+    <head>
+        <title>[[meta name="title"]]</title>
+        <meta name="description" content="[[meta name="description"]]">
+        <meta name="anything" content="[[meta name="random"]]"
+    </head>
+    <body>
+        <div id="nav">
+            [[navigation]]
+        </div>
+        <div id="body">
+            <div id="title">
+                [[element name="title" description="Set the title"]]
+            </div>
+            <div id="intro">
+                [[element name="introduction" description="Add an introductory paragraph"]]
+            </div>
+            <div id="footer>"
+                [[partial name="footer"]]
+            </div>
+        </div>
+    </body>
+</html>
+```
+
 ## TOML/Markdown files
 
 Work in progress.. 
