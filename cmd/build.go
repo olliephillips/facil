@@ -299,9 +299,18 @@ func processElements(markdown string, template string) string {
 	// Range over all the markdown tokens
 	for i := range markdownTokens {
 		token := strings.ToLower(markdownTokens[i][1])
+		tokenContent := markdownTokens[i][2]
+		var htmlContent string
 
 		// Process Markdown content ready for inclusion
-		htmlContent := string(blackfriday.MarkdownCommon([]byte(markdownTokens[i][2])))
+		if strings.Contains(tokenContent, "-nm") {
+			// This should be output in raw form and not processed by markdown conversion
+			htmlContent = string(tokenContent)
+			htmlContent = strings.Replace(htmlContent, "-nm", "", -1)
+		} else {
+			// Process the markdown
+			htmlContent = string(blackfriday.MarkdownCommon([]byte(tokenContent)))
+		}
 
 		if token == strings.ToLower(templateTokens[i][1]) {
 			// We have a match
@@ -324,41 +333,44 @@ func buildPartials() {
 	partialsTemplate := make(map[string]string)
 	partialsOutput = make(map[string]string) // Package namespace
 
-	err := filepath.Walk(relPath+projectDir+string(filepath.Separator)+"partials", func(path string, f os.FileInfo, _ error) error {
-		if !f.IsDir() {
-			//go func() {
-			filename := strings.ToLower(strings.Split(f.Name(), ".")[0])
-			extension := strings.ToLower(strings.Split(f.Name(), ".")[1])
-			if extension == "md" {
-				// Get the markdown file
-				md, err := ioutil.ReadFile(relPath + projectDir + string(filepath.Separator) + "partials" + string(filepath.Separator) + f.Name())
-				if err != nil {
-					log.Fatal("Error reading a partial markdown file")
+	partialsPath := relPath + projectDir + string(filepath.Separator) + "partials"
+	if dirExist(partialsPath) {
+		err := filepath.Walk(partialsPath, func(path string, f os.FileInfo, _ error) error {
+			if !f.IsDir() {
+				//go func() {
+				filename := strings.ToLower(strings.Split(f.Name(), ".")[0])
+				extension := strings.ToLower(strings.Split(f.Name(), ".")[1])
+				if extension == "md" {
+					// Get the markdown file
+					md, err := ioutil.ReadFile(partialsPath + string(filepath.Separator) + f.Name())
+					if err != nil {
+						log.Fatal("Error reading a partial markdown file")
+					}
+
+					tmp, err := ioutil.ReadFile(relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + theme +
+						string(filepath.Separator) + "partials" + string(filepath.Separator) + filename + ".html")
+
+					if err != nil {
+						log.Fatal("Error reading a partial template file")
+					}
+
+					// Store to our maps
+					partialsMarkdown[filename] = string(md)
+					partialsTemplate[filename] = string(tmp)
 				}
-
-				tmp, err := ioutil.ReadFile(relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + theme +
-					string(filepath.Separator) + "partials" + string(filepath.Separator) + filename + ".html")
-
-				if err != nil {
-					log.Fatal("Error reading a partial template file")
-				}
-
-				// Store to our maps
-				partialsMarkdown[filename] = string(md)
-				partialsTemplate[filename] = string(tmp)
+				//}()
 			}
-			//}()
+			return nil
+		})
+
+		if err != nil {
+			log.Fatal("Error unable to build partials")
 		}
-		return nil
-	})
 
-	if err != nil {
-		log.Fatal("Error unable to build partials")
-	}
-
-	// Range over one of the maps, pass name and both the markdown and template as args to processPartial()
-	for k := range partialsMarkdown {
-		partialsOutput[k] = processElements(partialsMarkdown[k], partialsTemplate[k])
+		// Range over one of the maps, pass name and both the markdown and template as args to processPartial()
+		for k := range partialsMarkdown {
+			partialsOutput[k] = processElements(partialsMarkdown[k], partialsTemplate[k])
+		}
 	}
 }
 
@@ -369,15 +381,19 @@ func copyThemeAssets() {
 	}
 
 	// Remove partials
-	err = filepath.Walk(relPath+projectDir+string(filepath.Separator)+"compiled"+string(filepath.Separator)+"partials", func(path string, f os.FileInfo, _ error) error {
-		// Remove html templates
-		if !f.IsDir() {
-			if strings.ToLower(strings.Split(f.Name(), ".")[1]) == "html" {
-				_ = os.Remove(relPath + projectDir + string(filepath.Separator) + "compiled" + string(filepath.Separator) + "partials" + string(filepath.Separator) + f.Name())
+	partialsPath := relPath + projectDir + string(filepath.Separator) + "compiled" + string(filepath.Separator) + "partials"
+	if dirExist(partialsPath) {
+
+		err = filepath.Walk(partialsPath, func(path string, f os.FileInfo, _ error) error {
+			// Remove html templates
+			if !f.IsDir() {
+				if strings.ToLower(strings.Split(f.Name(), ".")[1]) == "html" {
+					_ = os.Remove(partialsPath + string(filepath.Separator) + f.Name())
+				}
 			}
-		}
-		return nil
-	})
+			return nil
+		})
+	}
 
 	// Remove
 	err = filepath.Walk(relPath+projectDir+string(filepath.Separator)+"compiled", func(path string, f os.FileInfo, _ error) error {
@@ -541,7 +557,6 @@ func buildProject() {
 
 	// Build partials
 	buildPartials()
-	//fmt.Println(partialsOutput)
 
 	// Build Pages
 	processDir(relPath+projectDir+string(filepath.Separator)+"pages", relPath+projectDir+string(filepath.Separator)+"compiled", "page")
