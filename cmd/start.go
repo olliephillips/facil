@@ -42,6 +42,7 @@ func createConfigToml() error {
 	sitePath := basePath + string(filepath.Separator) + "sites" + string(filepath.Separator) + domain
 	fileOutput += "domain = \"" + domain + "\"\n"
 	fileOutput += "theme = \"" + theme + "\"\n"
+	fileOutput += "https = \"off\" # Set on for https prefixed urls\n"
 
 	// Write file
 	err := writeFile(sitePath+string(filepath.Separator)+"config.toml", fileOutput)

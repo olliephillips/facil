@@ -43,6 +43,7 @@ type (
 	config struct {
 		Domain string
 		Theme  string
+		Https  string
 	}
 
 	pageConfig struct {
@@ -179,18 +180,12 @@ func processPageFile(page string, dest string) {
 	}
 }
 
-func processBlog() {
-
-}
-
 func processFile(source string, dest string, contentType string) (err error) {
 	dest = strings.Replace(dest, ".md", ".html", -1)
 
 	switch contentType {
 	case "page":
 		processPageFile(source, dest)
-	case "blog":
-		//processBlogFile(sourceFile)
 	}
 	return
 }
@@ -563,19 +558,14 @@ func buildProject() {
 	// Build Pages
 	processDir(relPath+projectDir+string(filepath.Separator)+"pages", relPath+projectDir+string(filepath.Separator)+"compiled", "page")
 
-	// Traverse projects blog folder
-	// Each blog file
-	//processDir()
-
 	// Make Navigation
 	nav := makeNav()
 
 	// Write pages, replacing navigation token
 	writePages(nav)
 
-	// Write a sitemap.xml
+	// Write a sitemap.xml.gz
 	err = createSitemap()
-
 	if err != nil {
 		log.Fatal("Error sitemap.xml could not be written")
 	}
@@ -589,16 +579,19 @@ func createSitemap() error {
 
 	// Create our sitemap from our pages map
 	for i := range pages {
-
 		element := new(sitemap.Item)
 
 		filename := strings.Replace(pages[i].Path, compiledFolder+string(filepath.Separator), "", -1)
-		if filename == "index.html" {
-			filename = ""
+		if strings.HasSuffix(filename, "index.html") {
+			filename = strings.Replace(filename, "index.html", "", -1)
 		} else {
 			filename = strings.Replace(filename, ".html", "", -1)
 		}
-		element.Loc = "http://" + conf.Domain + string(filepath.Separator) + filename
+		prefix := "http://"
+		if conf.Https == "on" {
+			prefix = "https://"
+		}
+		element.Loc = prefix + conf.Domain + string(filepath.Separator) + filename
 		element.LastMod = time.Now()
 		element.Changefreq = "weekly"
 		if pages[i].Path == compiledFolder+string(filepath.Separator)+"index.html" {
@@ -606,9 +599,7 @@ func createSitemap() error {
 		} else {
 			element.Priority = 0.3
 		}
-
 		siteMapElements = append(siteMapElements, element)
-
 	}
 
 	// Write sitemap.xml.gz
