@@ -31,8 +31,10 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/joeguo/sitemap"
 	"github.com/russross/blackfriday"
 	"github.com/spf13/cobra"
 )
@@ -572,6 +574,49 @@ func buildProject() {
 	writePages(nav)
 
 	// Write a sitemap.xml
+	err = createSitemap()
+
+	if err != nil {
+		log.Fatal("Error sitemap.xml could not be written")
+	}
+
+}
+
+func createSitemap() error {
+	// Create a sitemap - will need to revist as currently geared for caddyserver ext directive https://caddyserver.com/docs/ext
+	compiledFolder := relPath + projectDir + string(filepath.Separator) + "compiled"
+	var siteMapElements []*sitemap.Item
+
+	// Create our sitemap from our pages map
+	for i := range pages {
+
+		element := new(sitemap.Item)
+
+		filename := strings.Replace(pages[i].Path, compiledFolder+string(filepath.Separator), "", -1)
+		if filename == "index.html" {
+			filename = ""
+		} else {
+			filename = strings.Replace(filename, ".html", "", -1)
+		}
+		element.Loc = "http://" + conf.Domain + string(filepath.Separator) + filename
+		element.LastMod = time.Now()
+		element.Changefreq = "weekly"
+		if pages[i].Path == compiledFolder+string(filepath.Separator)+"index.html" {
+			element.Priority = 0.8
+		} else {
+			element.Priority = 0.3
+		}
+
+		siteMapElements = append(siteMapElements, element)
+
+	}
+
+	// Write sitemap.xml.gz
+	err := sitemap.SiteMap(compiledFolder+string(filepath.Separator)+"sitemap.xml.gz", siteMapElements)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // buildCmd represents the build command
