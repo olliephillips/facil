@@ -286,34 +286,34 @@ func processElements(markdown string, template string) string {
 	var output string
 
 	// Parse element tags in template with regex
-	var templateToken = regexp.MustCompile(`\[\[element\sname\=\"([a-zA-Z0-9]*)\"\sdescription\=\"(.*)"]]`)
+	var templateToken = regexp.MustCompile(`\[\[element\stype\=\"([a-zA-Z0-9]*)\"\sname\=\"([a-zA-Z0-9]*)\"\sdescription\=\"(.*)"]]`)
 	templateTokens := templateToken.FindAllStringSubmatch(string(template), -1)
 
 	// Parse element tags in markdown file with regex
-	var markdownToken = regexp.MustCompile(`\*\*\*\s([a-zA-Z0-9]*)\s.*\n([\d\D][^\*]*)\*\*\*`)
+	var markdownToken = regexp.MustCompile(`\*\*\*([a-zA-Z0-9]*)\*\*\*\s([a-zA-Z0-9]*)\s.*\n([\d\D][^\*]*)\*\*\*`)
 	markdownTokens := markdownToken.FindAllStringSubmatch(string(markdown), -1)
 
 	// Range over all the markdown tokens
 	for i := range markdownTokens {
-		token := strings.ToLower(markdownTokens[i][1])
-		tokenContent := markdownTokens[i][2]
+		ttype := strings.ToLower(markdownTokens[i][1])
+		token := strings.ToLower(markdownTokens[i][2])
+		tokenContent := markdownTokens[i][3]
 		var htmlContent string
 
 		// Process Markdown content ready for inclusion
-		if strings.Contains(tokenContent, "-nm") {
+		if ttype == "text" {
 			// This should be output in raw form and not processed by markdown conversion
 			htmlContent = string(tokenContent)
-			htmlContent = strings.Replace(htmlContent, "-nm", "", -1)
 		} else {
 			// Process the markdown
 			htmlContent = string(blackfriday.MarkdownCommon([]byte(tokenContent)))
 		}
-
-		if token == strings.ToLower(templateTokens[i][1]) {
+		htmlContent = string(strings.Trim(htmlContent, "\n\t "))
+		if token == strings.ToLower(templateTokens[i][2]) {
 			// We have a match
-			description := templateTokens[i][2]
+			description := templateTokens[i][3]
 			// What to replace
-			replace := "[[element name=\"" + token + "\" description=\"" + description + "\"]]"
+			replace := "[[element type=\"" + ttype + "\" name=\"" + token + "\" description=\"" + description + "\"]]"
 			// Replace
 			template = strings.Replace(template, replace, htmlContent, -1)
 		}
@@ -353,7 +353,8 @@ func buildPartials() {
 
 					// Store to our maps
 					partialsMarkdown[filename] = string(md)
-					partialsTemplate[filename] = string(tmp)
+					//partialsTemplate[filename] = string(strings.Trim(tmp, "\t\n "))
+					partialsTemplate[filename] = strings.Trim(string(tmp), "\t\n ")
 				}
 				//}()
 			}

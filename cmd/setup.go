@@ -64,12 +64,14 @@ func addDefaultTheme() error {
         </div>
         <div id="body">
             <div id="title">
-                [[element name="title" description="Set the title"]]
+              <p>
+                	[[element type="text" name="title" description="Set the title"]]
+			  </p>
             </div>
             <div id="intro">
-                [[element name="introduction" description="Add an introductory paragraph"]]
+                [[element type="html" name="introduction" description="Add an introductory paragraph"]]
             </div>
-            <div id="footer>"
+            <div id="footer">
                 [[partial name="footer"]]
             </div>
         </div>
@@ -85,7 +87,7 @@ some css
     `
 
 	const partialFooter = `
-<div>[[element name="footer" description="A reuseable footer element"]]</div>
+<div>[[element type="html" name="footer" description="A reuseable footer element"]]</div>
     `
 	// Create folder structure
 	for i := range paths {

@@ -100,13 +100,18 @@ func createMarkdownTemplate(template string, filename string, isPage bool) error
 		}
 
 		// Parse element with regex
-		var elementToken = regexp.MustCompile(`\[\[element\sname\=\"([a-zA-Z0-9]*)\"\sdescription\=\"(.*)"]]`)
+		var elementToken = regexp.MustCompile(`\[\[element\stype\=\"([a-zA-Z0-9]*)\"\sname\=\"([a-zA-Z0-9]*)\"\sdescription\=\"(.*)"]]`)
 		elementTokens := elementToken.FindAllStringSubmatch(string(temp), -1)
 
 		// Compose element output
 		for i := range elementTokens {
-			fileOutput += "*** " + strings.Title(elementTokens[i][1]) + " (" + elementTokens[i][2] + ")\n\n"
-			fileOutput += "# Your " + strings.Title(elementTokens[i][1]) + " markdown syntax here\n\n"
+			fileOutput += "***" + strings.ToUpper(elementTokens[i][1]) + "*** " + strings.Title(elementTokens[i][2]) + " (" + elementTokens[i][3] + ")\n\n"
+			if elementTokens[i][1] == "html" {
+				fileOutput += "# Your " + strings.Title(elementTokens[i][2]) + " markdown/html syntax here\n\n"
+			} else {
+				fileOutput += "Your " + strings.Title(elementTokens[i][2]) + " text syntax here\n\n"
+			}
+
 			fileOutput += "***\n\n"
 		}
 

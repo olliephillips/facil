@@ -35,6 +35,5 @@ func main() {
 	// Hand off to our command line functions
 	cmd.Execute()
 
-	t2 := time.Now()
-	log.Printf("Program ran in about %v\n", t2.Sub(t1))
+	log.Printf("Program ran in about %v\n", time.Since(t1))
 }
