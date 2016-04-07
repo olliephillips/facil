@@ -190,7 +190,7 @@ template = "default"
 
 ***TEXT*** Title (Set the title)
 
-# Your Title syntax here
+Your Title syntax here
 
 ***
 

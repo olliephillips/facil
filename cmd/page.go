@@ -34,6 +34,13 @@ var (
 
 func addPage() error {
 
+	// Need to understand our path
+
+	err := createMarkdownTemplate("default.html", "pages/test.md", true)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // pageCmd represents the page command
