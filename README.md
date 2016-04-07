@@ -161,7 +161,7 @@ The `partials` directory will include one markdown file for each partial templat
 
 The `theme` directory contains the theme in use with this site. It is copied from the `themes` folder so that site level customizations can be made to the theme. In this example the theme is the `default` theme.
 
-`config.toml` is a file containing information about the site's domain and chosen theme, it is also automatically generated.
+`config.toml` is a file containing information about the site's domain, chosen theme and a flag for https, which defaults to "off" (this is used in sitemap generation). It is also automatically generated but can be manually edited.
  
 
 ## TOML/Markdown files
@@ -202,13 +202,18 @@ template = "default"
 
 ```
 
+## Sitemap creation
+
+Each time a site is built with the `build` command, a gzipped sitemap is created in the root (sitemap.xml.gz).
+All URLs included in the sitemap will be prefixed with 'http://' by default. 
+Sites using TLS should set their config.toml `https` property to "on" so that URLs will instead be prefixed with 'https://'.
+
 ## Roadmap
 
-- Finish it
+- Address issues log
 - Refactor it, with testing in mind
 - Add tests
 - Use it myself
-- Maybe extend to include blog type copy
 
 ## Why static websites?
 
