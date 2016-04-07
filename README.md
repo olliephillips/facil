@@ -53,7 +53,7 @@ Meta tokens store information about a page. They are formatted as follows:-
 
 ```
 
-Currently, these tokens are supported:-
+Currently, these meta tokens are supported:-
 
 ```
 [[meta name="title"]]
@@ -76,12 +76,21 @@ This token, when found in a template, will be replaced with a HTML unordered lis
 
 ```
 ### Element tokens
-Elements can provide copy for any HTML element in a template. To add a token, add something like this to your template. 
-Note the `description` attribute, think of this as a note or tip that provides a steer as to what content should be entered for the token.
+Elements can provide copy for any HTML element in a template. Copy can be HTML or simple text. The `type` attribute differentiates the two in the theme template. Text type elements are not processed as markdown, so add no extra html markup to the page.
+
+To add a HTML element token, add something like this to your template. 
 
 ```
-[[element name="title" description="Set the title"]]
+[[element type="html" name="title" description="Set the title"]]
 ```
+
+To add a text element token, do this.
+
+```
+[[element type="text" name="title" description="Set the title"]]
+```
+
+Note the `description` attribute, think of this as a note or tip that provides a steer as to what content should be entered for the token.
 
 ### Partial tokens
 
@@ -109,10 +118,12 @@ The below demonstrates how the above tokens are used in a template html file
         </div>
         <div id="body">
             <div id="title">
-                [[element name="title" description="Set the title"]]
+				<p>
+                	[[element type="text" name="title" description="Set the title"]]
+				</p>
             </div>
             <div id="intro">
-                [[element name="introduction" description="Add an introductory paragraph"]]
+                [[element type="html" name="introduction" description="Add an introductory paragraph"]]
             </div>
             <div id="footer>"
                 [[partial name="footer"]]
@@ -177,15 +188,15 @@ template = "default"
 
 +++
 
-*** Title (Set the title)
+***TEXT*** Title (Set the title)
 
-# Your Title markdown syntax here
+# Your Title syntax here
 
 ***
 
-*** Introduction (Add an introductory paragraph)
+***HTML*** Introduction (Add an introductory paragraph)
 
-# Your Introduction markdown syntax here
+# Your Introduction markdown/html syntax here
 
 ***
 
