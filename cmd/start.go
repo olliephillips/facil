@@ -24,6 +24,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -57,6 +58,7 @@ func createConfigToml() error {
 func createMarkdownTemplate(template string, filename string, isPage bool) error {
 	themePath := basePath + string(filepath.Separator) + "sites" + string(filepath.Separator) + domain + string(filepath.Separator) + "theme" + string(filepath.Separator) + theme
 	sitePath := basePath + string(filepath.Separator) + "sites" + string(filepath.Separator) + domain
+	fmt.Println(themePath)
 	if !dirExist(themePath) {
 		log.Fatal("Error cannot find theme to create markdown templates")
 	}

@@ -484,9 +484,7 @@ func makeNav() string {
 	return html
 }
 
-func buildProject() {
-	// Establish target directory based on project, check to ensure 'config.toml' exists
-
+func setRelPathProjDir() {
 	// Get current directory look for toml
 	dir, err := os.Getwd()
 	if err != nil {
@@ -528,6 +526,11 @@ func buildProject() {
 		}
 		relPath = ".." + string(filepath.Separator)
 	}
+}
+
+func buildProject() {
+	// Establish target directory based on project, check to ensure 'config.toml' exists
+	setRelPathProjDir()
 
 	// OK so we think we have a relative path and a project, test that siteDir and config.toml exist
 	if !dirExist(relPath + projectDir) {
