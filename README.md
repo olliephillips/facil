@@ -23,7 +23,7 @@ Currently Facil exposes the following command set:-
     
 - ```facil build yourwebsite.domain``` : Builds site, parses TOML and markdown using the the specified theme template and writes built output to 'compiled' subdirectory.
 
-- ```facil page --template page-name``` : (NOT YET IMPLEMENTED) The intent is to scaffold a new TOML/markdown page based on the chosen theme template.
+- ```facil page --template template page-name``` :  The intent is to scaffold a new TOML/markdown page based on the chosen theme template.
 
 ## Themes
 A theme is a collection of template files, JavaScript, CSS and image assets.
