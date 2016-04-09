@@ -105,7 +105,7 @@ func (slice navigationItems) Len() int {
 func (slice navigationItems) Less(i, j int) bool {
 	first, _ := strconv.Atoi(slice[i].Order)
 	second, _ := strconv.Atoi(slice[j].Order)
-	return int(first) < int(second)
+	return first < second
 }
 
 func (slice navigationItems) Swap(i, j int) {
@@ -343,7 +343,7 @@ func buildPartials() {
 					if err != nil {
 						log.Fatal("Error reading a partial markdown file")
 					}
-					
+
 					tmp, err := ioutil.ReadFile(relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + conf.Theme +
 						string(filepath.Separator) + "partials" + string(filepath.Separator) + filename + ".html")
 
@@ -564,7 +564,7 @@ func buildProject() {
 
 	// Make Navigation
 	nav := makeNav()
-
+	fmt.Println(nav)
 	// Write pages, replacing navigation token
 	writePages(nav)
 
