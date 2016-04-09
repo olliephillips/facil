@@ -71,7 +71,7 @@ func addPage() error {
 		}
 
 		// Parse meta with regex
-		var metaToken = regexp.MustCompile(`\[\[meta\sname\=\"([a-zA-Z0-9]*)\"]]`)
+		var metaToken = regexp.MustCompile(`\[\[meta\sname\=\"([a-zA-Z0-9_-]*)\"]]`)
 		metaTokens := metaToken.FindAllStringSubmatch(string(temp), -1)
 
 		// Compose meta output
@@ -93,7 +93,7 @@ func addPage() error {
 		fileOutput += "\n+++\n\n"
 
 		// Parse element with regex
-		var elementToken = regexp.MustCompile(`\[\[element\stype\=\"([a-zA-Z0-9]*)\"\sname\=\"([a-zA-Z0-9]*)\"\sdescription\=\"(.*)"]]`)
+		var elementToken = regexp.MustCompile(`\[\[element\stype\=\"([a-zA-Z0-9]*)\"\sname\=\"([a-zA-Z0-9_-]*)\"\sdescription\=\"(.*)"]]`)
 		elementTokens := elementToken.FindAllStringSubmatch(string(temp), -1)
 
 		// Compose element output

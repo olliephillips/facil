@@ -238,7 +238,7 @@ func processMeta(markdown string, template string) string {
 	var output string
 
 	// Parse meta tags in template with regex
-	var templateToken = regexp.MustCompile(`\[\[meta\sname\=\"([a-zA-Z0-9]*)\"\s*]]`)
+	var templateToken = regexp.MustCompile(`\[\[meta\sname\=\"([a-zA-Z0-9_-]*)\"\s*]]`)
 	templateTokens := templateToken.FindAllStringSubmatch(string(template), -1)
 
 	// Range over all the template tokens
@@ -260,7 +260,7 @@ func processPartials(template string) string {
 	var output string
 
 	// Parse partial tags in template with regex
-	var templateToken = regexp.MustCompile(`\[\[partial\sname\=\"([a-zA-Z0-9]*)\"\s*]]`)
+	var templateToken = regexp.MustCompile(`\[\[partial\sname\=\"([a-zA-Z0-9_-]*)\"\s*]]`)
 	templateTokens := templateToken.FindAllStringSubmatch(string(template), -1)
 
 	// We have a map loaded with all processed partials
@@ -286,11 +286,11 @@ func processElements(markdown string, template string) string {
 	var output string
 
 	// Parse element tags in template with regex
-	var templateToken = regexp.MustCompile(`\[\[element\stype\=\"([a-zA-Z0-9]*)\"\sname\=\"([a-zA-Z0-9]*)\"\sdescription\=\"(.*)"]]`)
+	var templateToken = regexp.MustCompile(`\[\[element\stype\=\"([a-zA-Z0-9]*)\"\sname\=\"([a-zA-Z0-9_-]*)\"\sdescription\=\"(.*)"]]`)
 	templateTokens := templateToken.FindAllStringSubmatch(string(template), -1)
 
 	// Parse element tags in markdown file with regex
-	var markdownToken = regexp.MustCompile(`\*\*\*([a-zA-Z0-9]*)\*\*\*\s([a-zA-Z0-9]*)\s.*\n([\d\D][^\*]*)\*\*\*`)
+	var markdownToken = regexp.MustCompile(`\*\*\*([a-zA-Z0-9]*)\*\*\*\s([a-zA-Z0-9_-]*)\s.*\n([\d\D][^\*]*)\*\*\*`)
 	markdownTokens := markdownToken.FindAllStringSubmatch(string(markdown), -1)
 
 	// Range over all the markdown tokens
@@ -343,8 +343,8 @@ func buildPartials() {
 					if err != nil {
 						log.Fatal("Error reading a partial markdown file")
 					}
-
-					tmp, err := ioutil.ReadFile(relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + theme +
+					
+					tmp, err := ioutil.ReadFile(relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + conf.Theme +
 						string(filepath.Separator) + "partials" + string(filepath.Separator) + filename + ".html")
 
 					if err != nil {

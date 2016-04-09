@@ -78,7 +78,7 @@ func createMarkdownTemplate(template string, filename string, isPage bool) error
 		// Is it a page or a partial template?
 		if isPage {
 			// Parse meta with regex
-			var metaToken = regexp.MustCompile(`\[\[meta\sname\=\"([a-zA-Z0-9]*)\"]]`)
+			var metaToken = regexp.MustCompile(`\[\[meta\sname\=\"([a-zA-Z0-9_-]*)\"]]`)
 			metaTokens := metaToken.FindAllStringSubmatch(string(temp), -1)
 
 			// Compose meta output
@@ -101,7 +101,7 @@ func createMarkdownTemplate(template string, filename string, isPage bool) error
 		}
 
 		// Parse element with regex
-		var elementToken = regexp.MustCompile(`\[\[element\stype\=\"([a-zA-Z0-9]*)\"\sname\=\"([a-zA-Z0-9]*)\"\sdescription\=\"(.*)"]]`)
+		var elementToken = regexp.MustCompile(`\[\[element\stype\=\"([a-zA-Z0-9]*)\"\sname\=\"([a-zA-Z0-9_-]*)\"\sdescription\=\"(.*)"]]`)
 		elementTokens := elementToken.FindAllStringSubmatch(string(temp), -1)
 
 		// Compose element output
