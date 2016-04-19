@@ -114,7 +114,7 @@ func (slice navigationItems) Swap(i, j int) {
 }
 
 func processPageFile(page string, dest string) {
-	var output, writeEl, navEl, sitemapEl string
+	var output, writeEl, navEl, sitemapEl, el string
 
 	// Get the template from file
 	markdown, err := ioutil.ReadFile(page)
@@ -153,12 +153,33 @@ func processPageFile(page string, dest string) {
 		output = processPartials(output)
 
 		// Logic is going to branch here, depending on whether pretty URLs are in use
+
 		switch conf.Pretty {
 		case "on":
 			// On, directory for page name and file is index.html
-			writeEl = ""
-			navEl = ""
-			sitemapEl = ""
+			splitDest := strings.Replace(strings.Split(dest, "compiled")[1], string(filepath.Separator), "", 1)
+			splitDest2 := strings.Split(splitDest, string(filepath.Separator))
+
+			if len(splitDest2) > 1 {
+				el = splitDest2[1]
+			} else {
+				el = splitDest2[0]
+			}
+
+			writeEl = strings.Replace(dest, el, "", -1)
+			var newDir string
+			if el != "index.md" {
+				newDir = strings.Replace(el, ".md", "", -1)
+				os.MkdirAll(writeEl+string(filepath.Separator)+newDir, 0755)
+			}
+			if newDir != "" {
+				writeEl = writeEl + newDir + string(filepath.Separator) + "index.html"
+			} else {
+				writeEl = writeEl + "index.html"
+			}
+
+			navEl = strings.Replace(strings.Split(writeEl, "compiled")[1], "index.html", "", -1)
+			sitemapEl = conf.Domain + navEl
 
 		default:
 			// We should have conf.Pretty="off" but set as default
@@ -185,44 +206,6 @@ func processPageFile(page string, dest string) {
 		}
 		pages = append(pages, p)
 	}
-
-	/*
-
-
-
-
-		// Add to sitemap & nav
-		element := strings.Split(dest, "compiled")[1]
-		element = strings.Replace(element, string(filepath.Separator)+"index.html", "/", -1)
-
-		// Add to sitemap
-		sitemapElement := conf.Domain + element
-		siteMap = append(siteMap, sitemapElement)
-
-		// Add to nav
-		navElement := strings.Replace(element, ".html", "", -1)
-
-		nav := navigationContent{
-			Text:  pageConf.Navigation.Text,
-			Order: pageConf.Navigation.Order,
-			Link:  navElement,
-		}
-
-		navElements = append(navElements, nav)
-
-
-
-
-
-		p := pageContent{
-			Path:    dest,
-			Content: output,
-		}
-
-		// Add this page to our slice
-		pages = append(pages, p)
-
-	}*/
 }
 
 func processFile(source string, dest string, contentType string) (err error) {
@@ -489,9 +472,9 @@ func makeNav() string {
 	for i := range navElements {
 		// Need to reorder based on order struct properties
 		text := navElements[i].Text
-		link := strings.Replace(navElements[i].Link, "/", "", 1)
+		link := strings.Replace(navElements[i].Link, string(filepath.Separator), "/", -1)
 
-		linkElements := strings.Split(link, "/")
+		linkElements := strings.Split(link, string(filepath.Separator))
 		elementsCount := len(linkElements)
 
 		if elementsCount == 2 {
@@ -630,10 +613,12 @@ func createSitemap() error {
 		element := new(sitemap.Item)
 		filename := siteMap[i]
 
+		// HTTP or HTTPS?
 		prefix := "http://"
 		if conf.Https == "on" {
 			prefix = "https://"
 		}
+
 		element.Loc = prefix + filename
 		element.LastMod = time.Now()
 		element.Changefreq = "weekly"
