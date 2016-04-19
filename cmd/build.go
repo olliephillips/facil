@@ -77,9 +77,10 @@ type (
 
 	// Navigation building
 	navigationContent struct {
-		Text  string
-		Order string
-		Link  string
+		Text        string
+		Order       string
+		Link        string
+		NaturalLink string
 	}
 
 	navigationItems []navigationContent
@@ -114,7 +115,7 @@ func (slice navigationItems) Swap(i, j int) {
 }
 
 func processPageFile(page string, dest string) {
-	var output, writeEl, navEl, sitemapEl, el string
+	var output, writeEl, navEl, navNatEl, sitemapEl, el string
 
 	// Get the template from file
 	markdown, err := ioutil.ReadFile(page)
@@ -179,12 +180,14 @@ func processPageFile(page string, dest string) {
 			}
 
 			navEl = strings.Replace(strings.Split(writeEl, "compiled")[1], "index.html", "", -1)
+			navNatEl = strings.Replace(strings.Split(strings.Replace(dest, ".md", ".html", -1), "compiled")[1], "index.html", "", -1)
 			sitemapEl = conf.Domain + navEl
 
 		default:
 			// We should have conf.Pretty="off" but set as default
 			writeEl = strings.Replace(dest, ".md", ".html", -1)
-			navEl = strings.Split(writeEl, "compiled")[1]
+			navEl = strings.Replace(strings.Split(writeEl, "compiled")[1], "index.html", "", -1)
+			navNatEl = strings.Replace(strings.Split(writeEl, "compiled")[1], "index.html", "", -1)
 			sitemapEl = conf.Domain + navEl
 		}
 
@@ -193,9 +196,10 @@ func processPageFile(page string, dest string) {
 
 		// Add to nav
 		nav := navigationContent{
-			Text:  pageConf.Navigation.Text,
-			Order: pageConf.Navigation.Order,
-			Link:  navEl,
+			Text:        pageConf.Navigation.Text,
+			Order:       pageConf.Navigation.Order,
+			Link:        navEl,
+			NaturalLink: navNatEl,
 		}
 		navElements = append(navElements, nav)
 
@@ -468,18 +472,18 @@ func makeNav() string {
 	sort.Sort(navElements)
 
 	var curLevel, prevLevel int
+
 	prevLevel = 1
 	for i := range navElements {
 		// Need to reorder based on order struct properties
 		text := navElements[i].Text
 		link := strings.Replace(navElements[i].Link, string(filepath.Separator), "/", -1)
+		naturalLink := strings.Replace(navElements[i].NaturalLink, string(filepath.Separator), "/", -1)
 
-		linkElements := strings.Split(link, "/")
+		linkElements := strings.Split(naturalLink, "/")
 		elementsCount := len(linkElements)
-		fmt.Println(link)
-		fmt.Println(elementsCount)
 
-		if elementsCount == 4 {
+		if elementsCount == 3 {
 			curLevel = 2
 		} else {
 			curLevel = 1
@@ -491,6 +495,7 @@ func makeNav() string {
 		}
 
 		if curLevel == 2 && prevLevel == 1 {
+
 			html += "\t<li><a href=\"" + link + "\">" + text + "</a>\n"
 			html += "\t\t<ul>\n"
 
@@ -593,7 +598,9 @@ func buildProject() {
 
 	// Make Navigation
 	nav := makeNav()
+
 	fmt.Println(nav)
+
 	// Write pages, replacing navigation token
 	writePages(nav)
 
