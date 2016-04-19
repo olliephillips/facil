@@ -160,9 +160,22 @@ The `pages` directory is where all your TOML/markdown files go. Each is a page o
 The `partials` directory will include one markdown file for each partial template in the theme. Here we have just a `footer.md` file. There is no TOML config information in a partial markdown file.
 
 The `theme` directory contains the theme in use with this site. It is copied from the `themes` folder so that site level customizations can be made to the theme. In this example the theme is the `default` theme.
-
-`config.toml` is a file containing information about the site's domain, chosen theme and a flag for https, which defaults to "off" (this is used in sitemap generation). It is also automatically generated but can be manually edited.
  
+## config.toml
+
+`config.toml` is a file containing information about the site. It is also automatically generated but can be manually edited.
+
+```
+domain = "mywebsite.com"
+theme = "default"
+https = "off" # Options are off, on
+pretty = "off" # Options are off, on
+
+```
+
+Setting `https` to on will generate the sitemap with a `https` prefix instead of `http`
+Setting `pretty` to on will generate pages, nav and sitemap in pretty url form. In this cases a folder takes on the page name, and the page file is named `index.html`. Both the navigation and sitemap omit the `index.html`
+
 
 ## TOML/Markdown files
 
