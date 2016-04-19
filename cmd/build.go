@@ -44,6 +44,7 @@ type (
 		Domain string
 		Theme  string
 		Https  string
+		Pretty string
 	}
 
 	pageConfig struct {
@@ -113,7 +114,7 @@ func (slice navigationItems) Swap(i, j int) {
 }
 
 func processPageFile(page string, dest string) {
-	var output string
+	var output, writeEl, navEl, sitemapEl string
 
 	// Get the template from file
 	markdown, err := ioutil.ReadFile(page)
@@ -126,10 +127,69 @@ func processPageFile(page string, dest string) {
 	tomlSection := markdownToml.FindStringSubmatch(string(markdown))
 
 	if len(tomlSection) > 1 {
+		// Read TOML
 		if _, err := toml.Decode(tomlSection[1], &pageConf); err != nil {
-			//log.Fatal("Error cannot parse page's toml config")
 			log.Fatal(err)
 		}
+
+		// Read template from theme
+		pageTemplate := relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + conf.Theme + string(filepath.Separator) + pageConf.Design.Template + ".html"
+
+		template, err := ioutil.ReadFile(pageTemplate)
+		if err != nil {
+			log.Fatal("Error template could not be read")
+		}
+
+		// Initialise into output var
+		output = string(template)
+
+		// Merge Meta
+		output = processMeta(string(markdown), output)
+
+		// Merge Elements
+		output = processElements(string(markdown), output)
+
+		// Merge Partials (we have a map of these)
+		output = processPartials(output)
+
+		// Logic is going to branch here, depending on whether pretty URLs are in use
+		switch conf.Pretty {
+		case "on":
+			// On, directory for page name and file is index.html
+			writeEl = ""
+			navEl = ""
+			sitemapEl = ""
+
+		default:
+			// We should have conf.Pretty="off" but set as default
+			writeEl = strings.Replace(dest, ".md", ".html", -1)
+			navEl = strings.Split(writeEl, "compiled")[1]
+			sitemapEl = conf.Domain + navEl
+		}
+
+		// Add to sitemap
+		siteMap = append(siteMap, sitemapEl)
+
+		// Add to nav
+		nav := navigationContent{
+			Text:  pageConf.Navigation.Text,
+			Order: pageConf.Navigation.Order,
+			Link:  navEl,
+		}
+		navElements = append(navElements, nav)
+
+		// Add tp pages slice
+		p := pageContent{
+			Path:    writeEl,
+			Content: output,
+		}
+		pages = append(pages, p)
+	}
+
+	/*
+
+
+
 
 		// Add to sitemap & nav
 		element := strings.Split(dest, "compiled")[1]
@@ -150,24 +210,9 @@ func processPageFile(page string, dest string) {
 
 		navElements = append(navElements, nav)
 
-		// Read template from theme
-		pageTemplate := relPath + projectDir + string(filepath.Separator) + "theme" + string(filepath.Separator) + conf.Theme + string(filepath.Separator) + pageConf.Design.Template + ".html"
 
-		template, err := ioutil.ReadFile(pageTemplate)
-		if err != nil {
-			log.Fatal("Error template could not be read")
-		}
 
-		output = string(template)
 
-		// Merge Meta
-		output = processMeta(string(markdown), output)
-
-		// Merge Elements
-		output = processElements(string(markdown), output)
-
-		// Merge Partials (we have a map of these)
-		output = processPartials(output)
 
 		p := pageContent{
 			Path:    dest,
@@ -177,11 +222,10 @@ func processPageFile(page string, dest string) {
 		// Add this page to our slice
 		pages = append(pages, p)
 
-	}
+	}*/
 }
 
 func processFile(source string, dest string, contentType string) (err error) {
-	dest = strings.Replace(dest, ".md", ".html", -1)
 
 	switch contentType {
 	case "page":
@@ -445,37 +489,37 @@ func makeNav() string {
 	for i := range navElements {
 		// Need to reorder based on order struct properties
 		text := navElements[i].Text
-		link := navElements[i].Link
+		link := strings.Replace(navElements[i].Link, "/", "", 1)
 
 		linkElements := strings.Split(link, "/")
 		elementsCount := len(linkElements)
 
-		if elementsCount == 3 {
-			curLevel = 3
-		} else {
+		if elementsCount == 2 {
 			curLevel = 2
+		} else {
+			curLevel = 1
 		}
 
-		if curLevel == 2 && prevLevel == 3 {
+		if curLevel == 1 && prevLevel == 2 {
 			html += "\t\t</ul>\n\t</li>\n"
 			html += "\t<li><a href=\"" + link + "\">" + text + "</a></li>\n"
 		}
 
-		if curLevel == 3 && prevLevel == 2 {
+		if curLevel == 2 && prevLevel == 1 {
 			html += "\t<li><a href=\"" + link + "\">" + text + "</a>\n"
 			html += "\t\t<ul>\n"
 
 		}
-		if curLevel == 2 && prevLevel == 2 {
+		if curLevel == 1 && prevLevel == 1 {
 			html += "\t<li><a href=\"" + link + "\">" + text + "</a></li>\n"
 		}
-		if curLevel == 3 && prevLevel == 3 {
+		if curLevel == 2 && prevLevel == 2 {
 			html += "\t\t\t<li><a href=\"" + link + "\">" + text + "</a></li>\n"
 		}
 		prevLevel = curLevel
 	}
 
-	if curLevel == 3 && prevLevel == 3 {
+	if curLevel == 2 && prevLevel == 2 {
 		html += "\t\t</ul>\n\t</li>\n"
 	}
 
@@ -582,20 +626,15 @@ func createSitemap() error {
 	var siteMapElements []*sitemap.Item
 
 	// Create our sitemap from our pages map
-	for i := range pages {
+	for i := range siteMap {
 		element := new(sitemap.Item)
+		filename := siteMap[i]
 
-		filename := strings.Replace(pages[i].Path, compiledFolder+string(filepath.Separator), "", -1)
-		if strings.HasSuffix(filename, "index.html") {
-			filename = strings.Replace(filename, "index.html", "", -1)
-		} else {
-			filename = strings.Replace(filename, ".html", "", -1)
-		}
 		prefix := "http://"
 		if conf.Https == "on" {
 			prefix = "https://"
 		}
-		element.Loc = prefix + conf.Domain + string(filepath.Separator) + filename
+		element.Loc = prefix + filename
 		element.LastMod = time.Now()
 		element.Changefreq = "weekly"
 		if pages[i].Path == compiledFolder+string(filepath.Separator)+"index.html" {

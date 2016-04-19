@@ -42,7 +42,8 @@ func createConfigToml() error {
 	sitePath := basePath + string(filepath.Separator) + "sites" + string(filepath.Separator) + domain
 	fileOutput += "domain = \"" + domain + "\"\n"
 	fileOutput += "theme = \"" + theme + "\"\n"
-	fileOutput += "https = \"off\" # Set on for https prefixed urls\n"
+	fileOutput += "https = \"off\" # Options are off, on\n"
+	fileOutput += "pretty = \"off\" # Options are off, on\n"
 
 	// Write file
 	err := writeFile(sitePath+string(filepath.Separator)+"config.toml", fileOutput)
@@ -158,7 +159,7 @@ func scaffoldSite() error {
 		}
 	}
 
-	// Create config.toml file - domain, theme
+	// Create config.toml file - domain, theme, https, pretty
 	err := createConfigToml()
 	if err != nil {
 		return err
