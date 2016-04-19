@@ -599,8 +599,6 @@ func buildProject() {
 	// Make Navigation
 	nav := makeNav()
 
-	fmt.Println(nav)
-
 	// Write pages, replacing navigation token
 	writePages(nav)
 
