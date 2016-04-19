@@ -468,16 +468,18 @@ func makeNav() string {
 	sort.Sort(navElements)
 
 	var curLevel, prevLevel int
-	prevLevel = 2
+	prevLevel = 1
 	for i := range navElements {
 		// Need to reorder based on order struct properties
 		text := navElements[i].Text
 		link := strings.Replace(navElements[i].Link, string(filepath.Separator), "/", -1)
 
-		linkElements := strings.Split(link, string(filepath.Separator))
+		linkElements := strings.Split(link, "/")
 		elementsCount := len(linkElements)
+		fmt.Println(link)
+		fmt.Println(elementsCount)
 
-		if elementsCount == 2 {
+		if elementsCount == 4 {
 			curLevel = 2
 		} else {
 			curLevel = 1
@@ -604,7 +606,7 @@ func buildProject() {
 }
 
 func createSitemap() error {
-	// Create a sitemap - will need to revist as currently geared for caddyserver ext directive https://caddyserver.com/docs/ext
+	// Create a sitemap
 	compiledFolder := relPath + projectDir + string(filepath.Separator) + "compiled"
 	var siteMapElements []*sitemap.Item
 
@@ -618,8 +620,8 @@ func createSitemap() error {
 		if conf.Https == "on" {
 			prefix = "https://"
 		}
-
-		element.Loc = prefix + filename
+		// Replace filepath separator
+		element.Loc = strings.Replace(prefix+filename, string(filepath.Separator), "/", -1)
 		element.LastMod = time.Now()
 		element.Changefreq = "weekly"
 		if pages[i].Path == compiledFolder+string(filepath.Separator)+"index.html" {
