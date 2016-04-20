@@ -21,6 +21,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -51,8 +52,8 @@ func addPage() error {
 	theme := conf.Theme
 
 	themePath := relPath + domain + string(filepath.Separator) + "theme" + string(filepath.Separator) + theme
-	sitePath := relPath + string(filepath.Separator) + domain
-
+	sitePath := relPath + string(filepath.Separator) + domain + string(filepath.Separator) + "pages"
+	fmt.Println(themePath)
 	if !dirExist(themePath) {
 		log.Fatal("Error cannot find theme to create markdown templates")
 	}
@@ -105,7 +106,7 @@ func addPage() error {
 				fileOutput += "Your " + strings.Title(elementTokens[i][2]) + " text syntax here\n\n"
 			}
 
-			fileOutput += "***\n\n"
+			fileOutput += "***\n\n\n\n\n"
 		}
 
 		// Write to file

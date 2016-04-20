@@ -289,7 +289,6 @@ func processMeta(markdown string, template string) string {
 
 func processPartials(template string) string {
 	var output string
-
 	// Parse partial tags in template with regex
 	var templateToken = regexp.MustCompile(`\[\[partial\sname\=\"([a-zA-Z0-9_-]*)\"\s*]]`)
 	templateTokens := templateToken.FindAllStringSubmatch(string(template), -1)
@@ -298,6 +297,7 @@ func processPartials(template string) string {
 	// Range over template tokens and find replace with corresponding value from map
 	for i := range templateTokens {
 		token := templateTokens[i][1]
+
 		if partialsOutput[token] != "" {
 			// We have a processed partial stored, do find replace
 			replace := "[[partial name=\"" + token + "\"]]"
@@ -305,7 +305,6 @@ func processPartials(template string) string {
 		}
 	}
 	output = template
-
 	// Return a merged string
 	return output
 }
@@ -363,6 +362,7 @@ func buildPartials() {
 
 	partialsPath := relPath + projectDir + string(filepath.Separator) + "partials"
 	if dirExist(partialsPath) {
+
 		err := filepath.Walk(partialsPath, func(path string, f os.FileInfo, _ error) error {
 			if !f.IsDir() {
 				filename := strings.ToLower(strings.Split(f.Name(), ".")[0])
