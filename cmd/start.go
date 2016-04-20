@@ -114,7 +114,7 @@ func createMarkdownTemplate(template string, filename string, isPage bool) error
 				fileOutput += "Your " + strings.Title(elementTokens[i][2]) + " text syntax here\n\n"
 			}
 
-			fileOutput += "***\n\n"
+			fileOutput += "***\n\n\n\n\n"
 		}
 
 		// Write to file

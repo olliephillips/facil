@@ -365,7 +365,6 @@ func buildPartials() {
 	if dirExist(partialsPath) {
 		err := filepath.Walk(partialsPath, func(path string, f os.FileInfo, _ error) error {
 			if !f.IsDir() {
-				//go func() {
 				filename := strings.ToLower(strings.Split(f.Name(), ".")[0])
 				extension := strings.ToLower(strings.Split(f.Name(), ".")[1])
 				if extension == "md" {
@@ -384,10 +383,8 @@ func buildPartials() {
 
 					// Store to our maps
 					partialsMarkdown[filename] = string(md)
-					//partialsTemplate[filename] = string(strings.Trim(tmp, "\t\n "))
 					partialsTemplate[filename] = strings.Trim(string(tmp), "\t\n ")
 				}
-				//}()
 			}
 			return nil
 		})
@@ -562,7 +559,7 @@ func setRelPathProjDir() {
 	}
 }
 
-func buildProject() {
+func buildProject() error {
 	// Establish target directory based on project, check to ensure 'config.toml' exists
 	setRelPathProjDir()
 
@@ -607,7 +604,7 @@ func buildProject() {
 	if err != nil {
 		log.Fatal("Error sitemap.xml could not be written")
 	}
-
+	return nil
 }
 
 func createSitemap() error {
@@ -654,7 +651,10 @@ var buildCmd = &cobra.Command{
     Once built the website is available in the 'compiled' directory.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		project = strings.Join(args, " ")
-		buildProject()
+		err := buildProject()
+		if err != nil {
+			log.Fatal("Error unable to build project")
+		}
 	},
 }
 
