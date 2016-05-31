@@ -8,7 +8,8 @@ Facil is my (experimental) static website generator which focusses on normal web
 Facil is very early stage, but all the concepts I seem to need are proven and roughly working. The code is currently quite ugly however.
 
 ## Example
-The project's website can be found [here](https://facil.olliephillips.co.uk).
+The project's website can now be found [here](https://olliephillips.github.io/facil/). To be fair there were some hoops to jump through to get dependencies paths working on Github pages
+- see [this issue](https://github.com/olliephillips/facil/issues/6).
 
 The website was built using a free responsive HTML theme which was converted to work with Facil. The content of that site was compiled to static HTML using Facil.
 
