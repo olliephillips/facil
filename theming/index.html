@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!--
+	Interphase by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Creating themes for Facil</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="This is some background information" />
+		<meta name="keywords" content="" />
+		<!--[if lte IE 8]><script src="css/ie/html5shiv.js"></script><![endif]-->
+		<script src="/js/jquery.min.js"></script>
+		<script src="/js/skel.min.js"></script>
+		<script src="/js/skel-layers.min.js"></script>
+		<script src="/js/init.js"></script>
+		<noscript>
+		<link rel="stylesheet" href="/css/skel.css" />
+		<link rel="stylesheet" href="/css/style.css" />
+		<link rel="stylesheet" href="/css/style-xlarge.css" />
+		</noscript>	
+	
+		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie/v8.css" /><![endif]-->
+	</head>
+	<body>
+
+		<!-- Header -->
+			<header id="header">
+				<h1><a href="/">Facil</a></h1>
+				<nav id="nav">
+					<ul>
+	<li><a href="/">Home</a></li>
+	<li><a href="/theming/">Creating Themes</a></li>
+	<li><a href="/about-me/">About me</a></li>
+</ul>
+				</nav>
+			</header>
+
+		<!-- Main -->
+			<section id="main" class="wrapper">
+				<div class="container">
+
+					<header class="major">	
+						<h2>Creating themes for Facil</h2>
+
+<p>How to take any theme and edit it to be compatible with Facil</p>	
+					</header>
+					
+					<h2>Themes</h2>
+
+<p>A theme is a collection of template files, JavaScript, CSS and image assets.</p>
+
+<p>New themes should be added to the <code>/themes</code> directory. Only a default.html template is mandatory. Partial templates should be placed in a <code>partials</code> folder. An example of simple structure which includes two page templates, one partial template, together with JavaScript, CSS and image assets, would be:</p>
+
+<pre><code>theme_name/
+partials/footer.html
+css/
+js/
+images/
+default.html
+left_sidebar.html
+</code></pre>
+
+<h3>Template files</h3>
+
+<p>Template files belong to a theme. A theme must have a minimum of one template file, named <code>default.html</code> though it can have as many as desired. They are basically just HTML files within which are some special placeholders, often referred to as &ldquo;tokens&rdquo;</p>
+
+<p>Facil reads template files and understands the following included placeholders/tokens (referred to as tokens from now).</p>
+
+<h3>Meta tokens</h3>
+
+<p>Meta tokens store information about a page. They are formatted as follows:-</p>
+
+<pre><code>[[meta name=&quot;title&quot;]]
+</code></pre>
+
+<p>Currently, these meta tokens are supported:-</p>
+
+<pre><code>[[meta name=&quot;title&quot;]]
+[[meta name=&quot;description&quot;]]
+[[meta name=&quot;keywords&quot;]]
+[[meta name=&quot;author&quot;]]
+</code></pre>
+
+<p>Within a theme template you might add a Meta token to the <code>&lt;title/&gt;</code> element like this:-</p>
+
+<pre><code>&lt;title&gt;[[meta name=&quot;title&quot;]]&lt;/title&gt;
+</code></pre>
+
+<p>That&rsquo;s all that is needed.</p>
+
+<p>The navigation token, when found in a template, will be replaced with a HTML unordered list of navigation options, built using the page hierarchy.</p>
+
+<pre><code>[[navigatin]]
+</code></pre>
+
+<h3>Element tokens</h3>
+
+<p>Elements can provide copy for any HTML element in a template. Copy can be HTML or simple text. The type attribute differentiates the two in the theme template. Text type elements are not processed as markdown, so add no extra html markup to the page.</p>
+
+<p>To add a HTML element token, add something like this to your template.</p>
+
+<pre><code>[[element type=&quot;html&quot; name=&quot;title&quot; description=&quot;Set the title&quot;]]
+</code></pre>
+
+<p>To add a text element token, do this.</p>
+
+<pre><code>[[element type=&quot;text&quot; name=&quot;title&quot; description=&quot;Set the title&quot;]]
+</code></pre>
+
+<p>Note the description attribute, think of this as a note or tip that provides a steer as to what content should be entered for the token.</p>
+
+<h3>Partial tokens</h3>
+
+<p>Partial tokens allow the inclusion of content that is used in multiple places in the site. For example if you have three templates, default.html, left-sidebar.html and right-sidebar, they may share some elements such as a footer. In this scenario it is sensible to use a partial to create this content once but include it in all three templates</p>
+
+<pre><code>[[partial name=&quot;footer&quot;]]
+</code></pre>
+							
+				</div>
+			</section>
+
+		<!-- Footer -->
+		<footer id="footer">
+				<div class="container">
+					<ul class="copyright">
+						<li>&copy; Ollie Phillips. All rights reserved.</li>
+						<li>Design: <a href="http://templated.co">TEMPLATED</a></li>
+						<li>Images: <a href="http://unsplash.com">Unsplash</a></li>
+					</ul>
+				</div>
+			</footer>	
+
+	</body>
+</html>
